@@ -63,6 +63,24 @@ class BlocoBaixo(Bloco):
             self.cor = (0, 100, 100)
 
 
+class BlocoRepetir(Bloco):
+    """Counted loop block that groups sub-commands and repeats them n times."""
+
+    def __init__(self, x, y, n=2):
+        super().__init__(x, y, 80, 30, (220, 130, 0))
+        self.tipo = "repetir"
+        self.n = n
+        self.comandos = []
+        self.clicado = False
+
+    def desenhar(self, superficie):
+        pygame.draw.rect(superficie, self.cor, self.rect)
+        pygame.draw.rect(superficie, (160, 90, 0), self.rect, 2)
+        fonte = pygame.font.SysFont(None, 18)
+        texto = fonte.render(f"Rep x{self.n}", True, (255, 255, 255))
+        superficie.blit(texto, (self.rect.x + 5, self.rect.y + 8))
+
+
 
 
 
