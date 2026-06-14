@@ -11,26 +11,40 @@ class Personagem:
         self.direcao_atual = None
         self.tempo_ultimo_passo = 0      # ← novo
         self.delay_entre_passos = 500    # ← meio segundo entre cada passo (ms)
+        self.comandos_expandidos = []    # flat list built at deploy time
 
     def desenhar(self, superficie, x, y):
         pygame.draw.circle(superficie, (0, 255, 0), (x, y), 15)
 
-    def iniciar_programacao(self):
+    def iniciar_programacao(self, lista_pecas):
         self.executando_comandos = True
         self.indice_comando_atual = 0
-        self.tempo_ultimo_passo = pygame.time.get_ticks()  # ← marca o tempo inicial
+        self.tempo_ultimo_passo = pygame.time.get_ticks()
+        self.comandos_expandidos = self._expandir_lista(lista_pecas)
 
-    def atualizar_movimento(self, lista_pecas, matriz_jogo):
+    def _expandir_lista(self, lista):
+        """Flatten BlocoRepetir containers into a sequential command list."""
+        from src.blocos import BlocoRepetir
+        expandida = []
+        for peca in lista:
+            if isinstance(peca, BlocoRepetir):
+                for _ in range(peca.n):
+                    expandida.extend(peca.comandos)
+            else:
+                expandida.append(peca)
+        return expandida
+
+    def atualizar_movimento(self, matriz_jogo):
         if not self.executando_comandos:
             return
 
         # Só executa o próximo passo se já passou o delay
         agora = pygame.time.get_ticks()
         if agora - self.tempo_ultimo_passo < self.delay_entre_passos:
-            return   # ← ainda não é hora de mover
+            return
 
-        if self.indice_comando_atual < len(lista_pecas):
-            peca_atual = lista_pecas[self.indice_comando_atual]
+        if self.indice_comando_atual < len(self.comandos_expandidos):
+            peca_atual = self.comandos_expandidos[self.indice_comando_atual]
             direcao = peca_atual.tipo
 
             nova_coluna = self.coluna
@@ -54,6 +68,6 @@ class Personagem:
                     matriz_jogo[self.linha][self.coluna] = self
 
             self.indice_comando_atual += 1
-            self.tempo_ultimo_passo = agora  # ← atualiza o tempo após cada passo
+            self.tempo_ultimo_passo = agora
         else:
             self.executando_comandos = False
