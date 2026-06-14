@@ -1,5 +1,6 @@
 import pygame
 from src.configuracao import TAMANHO_CELULA, CORES
+from src.item import Item
 
 
 class Personagem:
@@ -20,7 +21,7 @@ class Personagem:
         self.indice_comando_atual = 0
         self.tempo_ultimo_passo = pygame.time.get_ticks()  # ← marca o tempo inicial
 
-    def atualizar_movimento(self, lista_pecas, matriz_jogo):
+    def atualizar_movimento(self, lista_pecas, matriz_jogo, pontuacao):
         if not self.executando_comandos:
             return
 
@@ -47,13 +48,20 @@ class Personagem:
 
             if 0 <= nova_linha < len(matriz_jogo) and 0 <= nova_coluna < len(matriz_jogo[0]):
                 elemento_destino = matriz_jogo[nova_linha][nova_coluna]
-                if elemento_destino is None or elemento_destino == self:
+                if elemento_destino is None or elemento_destino == self or isinstance(elemento_destino, Item):
+                    if isinstance(elemento_destino, Item):
+                        matriz_jogo[nova_linha][nova_coluna] = None
+                        pontuacao.adicionar_pontos()
+                        print("Pontuação:", pontuacao.pontos)
+
                     matriz_jogo[self.linha][self.coluna] = None
                     self.linha = nova_linha
                     self.coluna = nova_coluna
                     matriz_jogo[self.linha][self.coluna] = self
 
-            self.indice_comando_atual += 1
-            self.tempo_ultimo_passo = agora  # ← atualiza o tempo após cada passo
-        else:
-            self.executando_comandos = False
+                self.indice_comando_atual += 1
+                self.tempo_ultimo_passo = agora
+                
+                if self.indice_comando_atual >= len(lista_pecas):
+                    self.executando_comandos = False
+                    return

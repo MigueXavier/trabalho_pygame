@@ -10,16 +10,21 @@ pygame.display.set_caption("Teste de Barreira")
 personagem = Personagem(2, 1)
 barreira1 = Barreira( 50, (255, 0, 0))
 
+from src.item import Item
+item1 = Item()
+
 # criar matrizes diferentes para fases futuras
 
 class Matriz:
     def __init__(self):
         self.matriz = [
-            [barreira1, None, None, None],
+            [barreira1, None, None, item1],
             [barreira1, barreira1, None, None],
             [barreira1, personagem, None, None],
             [barreira1, barreira1, barreira1, barreira1]
         ]
+
+
  
 
 

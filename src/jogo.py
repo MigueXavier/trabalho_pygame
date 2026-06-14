@@ -7,6 +7,7 @@ from src.personagem import Personagem
 from src.blocos import BlocoEsquerda, BlocoDireita, BlocoCima, BlocoBaixo
 from src.comandos import BotaoDeploy, BotaoReset
 from src.matriz import Matriz
+from src.pontuacao import Pontuacao
 
 class Jogo:
     def __init__(self):
@@ -20,6 +21,8 @@ class Jogo:
     def inicializar_elementos(self):
         self.objeto_matriz = Matriz()
         self.matriz = self.objeto_matriz.matriz
+        self.pontuacao = Pontuacao()
+        self.fonte = pygame.font.Font(None, 36)
 
         self.personagem = None
         for linha in self.matriz:
@@ -95,7 +98,11 @@ class Jogo:
                     self.botao_reset.acao(self.lista_pecas, self.bloco_direita, self.bloco_esquerda, self.bloco_cima, self.bloco_baixo)
 
     def atualizar(self):
-        self.personagem.atualizar_movimento(self.lista_pecas, self.matriz)
+        self.personagem.atualizar_movimento(
+        self.lista_pecas,
+        self.matriz,
+        self.pontuacao
+    )
 
     def _desenhar_linha_translucida(self, y):
         """Desenha uma linha horizontal translúcida no painel direito."""
@@ -144,6 +151,11 @@ class Jogo:
             objeto_botao.rect.x = self.pos_x_inicial + (indice * self.espacamento)
             objeto_botao.rect.y = self.pos_y_lista
             objeto_botao.desenhar(self.tela)
+
+        texto = self.fonte.render(
+            f"Pontos: {self.pontuacao.pontos}",True,(255, 255, 255))
+
+        self.tela.blit(texto, (10, 10))
 
         pygame.display.update()
 
