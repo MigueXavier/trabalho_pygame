@@ -237,19 +237,47 @@ class Jogo:
         # ── Matriz à esquerda, centralizada ─────────────────────────
         cols = len(self.matriz[0])
         rows = len(self.matriz)
-        offset_x = (self.PAINEL_X - cols * 50) // 2
-        offset_y = (ALTURA_TELA  - rows * 50) // 2
 
+        BORDA = 1
+        total_cols = cols + 2 * BORDA
+        total_rows = rows + 2 * BORDA
+
+        offset_x = (self.PAINEL_X - total_cols * TAMANHO_CELULA) // 2
+        offset_y = (ALTURA_TELA  - total_rows * TAMANHO_CELULA) // 2
+
+        # 1. Desenha as paredes na borda externa
+        for i in range(total_rows):
+            for j in range(total_cols):
+                x = offset_x + j * TAMANHO_CELULA
+                y = offset_y + i * TAMANHO_CELULA
+                sprite_p = self.objeto_matriz._sprite_parede(i, j, total_rows, total_cols)
+                if sprite_p:
+                    self.tela.blit(sprite_p, (x, y))
+
+        # 2. Desenha o interior: Fundo + Linhas Divisórias + Entidades
         for i in range(rows):
             for j in range(cols):
-                x = offset_x + j * 50
-                y = offset_y + i * 50
-                if self.matriz[i][j] is not None:
-                    if isinstance(self.matriz[i][j], Personagem):
-                        self.matriz[i][j].desenhar(self.tela, x + 25, y + 25)
-                    else:
-                        self.matriz[i][j].desenhar(self.tela, x, y)
+              
+                x = offset_x + (j + BORDA) * TAMANHO_CELULA
+                y = offset_y + (i + BORDA) * TAMANHO_CELULA
 
+               
+                self.tela.blit(self.objeto_matriz.fundo, (x, y))
+
+                # --- NOVA PARTE: Desenha a linha divisória ao redor da célula ---
+                # Cor cinza escuro (40, 40, 40) 
+                cor_da_linha = CORES["COR_LINHA"] 
+                pygame.draw.rect(self.tela, cor_da_linha, (x, y, TAMANHO_CELULA, TAMANHO_CELULA), 2)
+                
+
+               
+                celula = self.matriz[i][j]
+                if celula is not None:
+                    if isinstance(celula, Personagem):
+                        
+                        celula.desenhar(self.tela, x + TAMANHO_CELULA // 2, y + TAMANHO_CELULA // 2)
+                    else:
+                        celula.desenhar(self.tela, x, y)
         # ── Painel direito ───────────────────────────────────────────
         self.bloco_cima.desenhar(self.tela)
         self.bloco_baixo.desenhar(self.tela)

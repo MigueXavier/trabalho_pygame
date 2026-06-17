@@ -9,6 +9,9 @@ class Personagem:
         self.coluna = coluna_inicio
         self.linha = linha_inicio
 
+        self.sprite = pygame.image.load("assets/sprites/sprits-jogo-python/personagem1.png").convert_alpha()
+        self.sprite = pygame.transform.scale(self.sprite, (TAMANHO_CELULA, TAMANHO_CELULA))
+
 
         self.linha_inicial = linha_inicio
         self.coluna_inicial = coluna_inicio
@@ -23,7 +26,8 @@ class Personagem:
         self.chegou_no_objetivo = False
 
     def desenhar(self, superficie, x, y):
-        pygame.draw.circle(superficie, (0, 255, 0), (x, y), 15)
+         rect = self.sprite.get_rect(center=(x, y))
+         superficie.blit(self.sprite, rect)
 
     def iniciar_programacao(self, lista_pecas, pontuacao=None):
         self.executando_comandos = True

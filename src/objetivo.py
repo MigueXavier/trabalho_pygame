@@ -1,14 +1,15 @@
 import pygame
 import sys
+from src.configuracao import *
 
 
 class Objetivo:
-    def __init__(self,  largura_altura, color):
+    def __init__(self):
         self.x = None
         self.y = None
-        self.width = largura_altura
-        self.height = largura_altura
-        self.color = color
+        self.sprite = pygame.image.load("assets/sprites/sprits-jogo-python/estrela.png").convert_alpha()
+        self.sprite = pygame.transform.scale(self.sprite, (TAMANHO_CELULA -20 , TAMANHO_CELULA -20))
     
     def desenhar(self, superficie, x, y):
-        pygame.draw.rect(superficie, self.color, (x + 15, y, self.width, self.height))
+        rect = self.sprite.get_rect(center=(x + 25, y + 25))
+        superficie.blit(self.sprite, rect)

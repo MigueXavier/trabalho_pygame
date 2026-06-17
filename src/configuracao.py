@@ -1,5 +1,5 @@
 # ── Tela ──────────────────────────────────────────────────────────────────────
-LARGURA_TELA = 800
+LARGURA_TELA = 1200
 ALTURA_TELA  = 600
 FPS          = 60
 TITULO       = "Perdido no Algoritmo"
