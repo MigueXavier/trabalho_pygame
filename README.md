@@ -215,24 +215,35 @@ python -m pytest tests/ -v
 <div align="center">
 
 ```
-╔══════════════════════════════════════════════════╗
-║               CONTROLES DO JOGO                  ║
-╠══════════════════════════════════════════════════╣
-║                                                  ║
-║  ␣   ESPAÇO           →  Iniciar partida         ║
-║                                                  ║
-║  ← ↑ → ↓ / WASD       →  Mover o personagem      ║
-║                                                  ║
-║  R                    →  Reiniciar (game over)   ║
-║                                                  ║
-║  ⎋   ESC              →  Sair do jogo            ║
-║                                                  ║
-╚══════════════════════════════════════════════════╝
+╔══════════════════════════════════════════════════════════╗
+║                MANUAL DE BLOCOS E BOTÕES                 ║
+╠══════════════════════════════════════════════════════════╣
+║                                                          ║
+║  [ -> ]  Bloco Direita   → Move o personagem 1 casa      ║
+║                            para a direita                ║
+║  [ <- ]  Bloco Esquerda  → Move o personagem 1 casa      ║
+║                            para a esquerda               ║
+║  [  ^ ]  Bloco Cima      → Move o personagem 1 casa      ║
+║                            para cima                     ║
+║  [  v ]  Bloco Baixo     → Move o personagem 1 casa      ║
+║                            para baixo                    ║
+║                                                          ║
+║  [Rep xN] Bloco Repetir  → Multiplica por N todos os     ║
+║                            blocos inseridos dentro dele  ║
+║                                                          ║
+║ ════════════════════════════════════════════════════════ ║
+║                                                          ║
+║  [ Deploy ] Botão Azul   → Compila e executa a fila de   ║
+║                            comandos no personagem        ║
+║                                                          ║
+║  [ Reset  ] Botão Amarelo→ Limpa a fila de comandos e    ║
+║                            reseta os blocos da paleta    ║
+║                                                          ║
+╚══════════════════════════════════════════════════════════╝
 ```
 
 </div>
 
-> Observação: o protótipo da Semana 2 utiliza controle direto por teclado. Os blocos de programação descritos na proposta serão implementados nas próximas entregas.
 
 ---
 

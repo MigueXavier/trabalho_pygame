@@ -7,6 +7,7 @@ from src.personagem import Personagem
 from src.blocos import BlocoEsquerda, BlocoDireita, BlocoCima, BlocoBaixo, BlocoRepetir
 from src.comandos import BotaoDeploy, BotaoReset, Botao
 from src.matriz import Matriz
+from src.pontuacao import Pontuacao
 
 class Jogo:
     def __init__(self):
@@ -31,6 +32,9 @@ class Jogo:
         if self.personagem is None:
             self.personagem = Personagem(0, 0)
 
+        self.pontuacao = Pontuacao()
+        self.fonte = pygame.font.Font(None, 36)
+
         # Divisão da tela
         self.PAINEL_X = LARGURA_TELA // 2  # x=400
 
@@ -48,6 +52,7 @@ class Jogo:
         self.bloco_baixo    = BlocoBaixo(   grade_x + bloco_w + gap, 80)
         self.bloco_esquerda = BlocoEsquerda(grade_x,              80 + bloco_h + gap)
         self.bloco_direita  = BlocoDireita( grade_x + bloco_w + gap, 80 + bloco_h + gap)
+        
 
         # ── Bloco de repetição + controles de n ─────────────────────
         # Linha 3 (y=160): [−] n [+] | [Repetir]
@@ -81,6 +86,9 @@ class Jogo:
 
         # Linhas separadoras do painel (y fixos)
         self.sep_y = [200, 270, 510]  # entre blocos/fila e fila/botões
+
+        # --- Fonte maior e em negrito para os avisos de fim de jogo ---
+        self.fonte_status = pygame.font.SysFont("Arial", 50, bold=True)
 
     def processar_eventos(self):
         for evento in pygame.event.get():
@@ -126,7 +134,7 @@ class Jogo:
                     elif self.bloco_repetir_paleta.checar_clique(pos_mouse):
                         self._iniciar_loop()
                     elif self.botao_deploy.checar_clique(pos_mouse):
-                        self.botao_deploy.acao(self.personagem, self.lista_pecas)
+                        self.botao_deploy.acao(self.personagem, self.lista_pecas, self.pontuacao)
                     elif self.botao_reset.checar_clique(pos_mouse):
                         self._reset_completo()
                     elif self.botao_menos.checar_clique(pos_mouse):
@@ -165,6 +173,7 @@ class Jogo:
         self.loop_ativo = None
         self.bloco_repetir_paleta.clicado = False
         self.bloco_repetir_paleta.cor = (220, 130, 0)
+        self.pontuacao.resetar()
 
     # ── Drawing ─────────────────────────────────────────────────────────────
 
@@ -178,8 +187,10 @@ class Jogo:
         """Draw the command queue; BlocoRepetir is rendered wide with sub-commands."""
         x = self.pos_x_inicial
         y = self.pos_y_lista
-
+        
         for peca in self.lista_pecas:
+            if peca is None:
+                continue
             if getattr(peca, 'tipo', None) == 'repetir':
                 n_sub = len(peca.comandos)
                 largura = 80 + (n_sub * self.espacamento if n_sub > 0 else 0)
@@ -226,19 +237,47 @@ class Jogo:
         # ── Matriz à esquerda, centralizada ─────────────────────────
         cols = len(self.matriz[0])
         rows = len(self.matriz)
-        offset_x = (self.PAINEL_X - cols * 50) // 2
-        offset_y = (ALTURA_TELA  - rows * 50) // 2
 
+        BORDA = 1
+        total_cols = cols + 2 * BORDA
+        total_rows = rows + 2 * BORDA
+
+        offset_x = (self.PAINEL_X - total_cols * TAMANHO_CELULA) // 2
+        offset_y = (ALTURA_TELA  - total_rows * TAMANHO_CELULA) // 2
+
+        # 1. Desenha as paredes na borda externa
+        for i in range(total_rows):
+            for j in range(total_cols):
+                x = offset_x + j * TAMANHO_CELULA
+                y = offset_y + i * TAMANHO_CELULA
+                sprite_p = self.objeto_matriz._sprite_parede(i, j, total_rows, total_cols)
+                if sprite_p:
+                    self.tela.blit(sprite_p, (x, y))
+
+        # 2. Desenha o interior: Fundo + Linhas Divisórias + Entidades
         for i in range(rows):
             for j in range(cols):
-                x = offset_x + j * 50
-                y = offset_y + i * 50
-                if self.matriz[i][j] is not None:
-                    if isinstance(self.matriz[i][j], Personagem):
-                        self.matriz[i][j].desenhar(self.tela, x + 25, y + 25)
-                    else:
-                        self.matriz[i][j].desenhar(self.tela, x, y)
+              
+                x = offset_x + (j + BORDA) * TAMANHO_CELULA
+                y = offset_y + (i + BORDA) * TAMANHO_CELULA
 
+               
+                self.tela.blit(self.objeto_matriz.fundo, (x, y))
+
+                # --- NOVA PARTE: Desenha a linha divisória ao redor da célula ---
+                # Cor cinza escuro (40, 40, 40) 
+                cor_da_linha = CORES["COR_LINHA"] 
+                pygame.draw.rect(self.tela, cor_da_linha, (x, y, TAMANHO_CELULA, TAMANHO_CELULA), 2)
+                
+
+               
+                celula = self.matriz[i][j]
+                if celula is not None:
+                    if isinstance(celula, Personagem):
+                        
+                        celula.desenhar(self.tela, x + TAMANHO_CELULA // 2, y + TAMANHO_CELULA // 2)
+                    else:
+                        celula.desenhar(self.tela, x, y)
         # ── Painel direito ───────────────────────────────────────────
         self.bloco_cima.desenhar(self.tela)
         self.bloco_baixo.desenhar(self.tela)
@@ -274,6 +313,25 @@ class Jogo:
 
         # Fila de comandos
         self._desenhar_fila_comandos()
+
+        texto = self.fonte.render(
+            f"Pontos: {self.pontuacao.pontos}", True, (255, 255, 255))
+        self.tela.blit(texto, (10, 10))
+
+
+
+        if self.personagem.chegou_no_objetivo:
+            surf_texto = self.fonte_status.render("PARABÉNS!", True, (0, 255, 0))
+           
+            rect_texto = surf_texto.get_rect(center=(self.PAINEL_X // 2, ALTURA_TELA // 6))
+            self.tela.blit(surf_texto, rect_texto)
+
+    
+        elif self.personagem.vidas <= 0:
+            surf_texto = self.fonte_status.render("GAME OVER", True, (255, 0, 0))
+            rect_texto = surf_texto.get_rect(center=(self.PAINEL_X // 2, ALTURA_TELA // 6))
+            self.tela.blit(surf_texto, rect_texto)
+
 
         pygame.display.update()
 

@@ -18,8 +18,8 @@ class BotaoDeploy(Botao):
     def __init__(self, x, y):
         super().__init__(x, y, 120, 35, (0, 0, 200))
 
-    def acao(self, personagem_alvo, lista_pecas):
-        personagem_alvo.iniciar_programacao(lista_pecas)
+    def acao(self, personagem_alvo, lista_pecas, pontuacao=None):
+        personagem_alvo.iniciar_programacao(lista_pecas, pontuacao)
 class BotaoReset(Botao):
     def __init__(self, x, y):
         super().__init__(x, y, 120, 35, (200, 200, 0))
