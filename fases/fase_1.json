@@ -1,15 +1,11 @@
 {
-  "nome": "Olá, Mundo!",
-  "descricao": "Chegue até a saída usando os blocos de comando.",
-  "limite_blocos": 5,
-  "posicao_inicial": [1, 1],
+  "fase": 1,
+  "blocos_disponiveis": ["cima", "baixo", "esquerda", "direita","direita", "repetir"],
   "mapa": [
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-    [2, 0, 0, 0, 0, 0, 0, 0, 0, 2],
-    [2, 0, 1, 1, 1, 0, 1, 1, 0, 2],
-    [2, 0, 1, 3, 0, 0, 0, 1, 0, 2],
-    [2, 0, 1, 0, 1, 1, 0, 1, 0, 2],
-    [2, 0, 0, 0, 0, 0, 0, 0, 4, 2],
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+    [1, 0, 0, 3, 0],
+    [0, 2, 0, 2, 0],
+    [3, 2, 0, 0, 0],
+    [0, 0, 0, 2, 4],
+    [0, 0, 3, 0, 0]
   ]
 }

@@ -7,47 +7,18 @@ from src.personagem import Personagem
 from src.item import Item
 from src.objetivo import Objetivo
 
-tela = pygame.display.set_mode((640, 480))
-pygame.display.set_caption("Teste de Barreira")
-
-
-personagem = Personagem(0, 0)  
-barreira1 = Barreira(50, (255, 0, 0))
-objetivo = Objetivo()
-item1 = Item()     
-estrela = Item()  
-
-
-import pygame
-import sys
-import copy
-from src.configuracao import *
-from src.barreira import Barreira
-from src.personagem import Personagem
-from src.item import Item
-from src.objetivo import Objetivo
-
-
 class Matriz:
-    def __init__(self):
-      
+    def __init__(self, dados_fase=None):
+        # 1. Carregamento Gráfico Existente
         self.spritesheet = pygame.image.load("assets/sprites/sprits-jogo-python/dungeon_sheet.png").convert_alpha()
-        
-        
         self.TAM_SPRITE_BASE = 16 
 
-       
         coordenadas_paredes = {
-           
             "canto_topo_esq":  (0, 0, 16, 16),    # Primeira célula do topo esquerdo
             "topo":            (16, 0, 16, 16),   # Bloco do meio do topo
             "canto_topo_dir":  (32, 0, 16, 16),   # Terceira célula do topo (borda direita)
-            
-            # Linha do Meio (Y = 16)
             "esquerda":        (0, 16, 16, 16),   # Borda esquerda pura
             "direita":         (32, 16, 16, 16),  # Borda direita pura
-            
-            # Linha de Baixo (Y = 32)
             "canto_baixo_esq": (0, 32, 16, 16),   # Quina inferior esquerda
             "baixo":           (16, 32, 16, 16),  # Bloco do meio de baixo
             "canto_baixo_dir": (32, 32, 16, 16),  # Quina inferior direita
@@ -55,24 +26,45 @@ class Matriz:
         
         self.sprites_parede = {}
         for nome, coord in coordenadas_paredes.items():
-            
             sub_surface = self.spritesheet.subsurface(pygame.Rect(coord))
-            
             self.sprites_parede[nome] = pygame.transform.scale(sub_surface, (TAMANHO_CELULA, TAMANHO_CELULA))
 
-      
         self.fundo = pygame.image.load("assets/sprites/sprits-jogo-python/fundo_16px.png").convert()
         self.fundo = pygame.transform.scale(self.fundo, (TAMANHO_CELULA, TAMANHO_CELULA))
 
-        rows = 5  
-        cols = 5  
-        self.matriz = [
-            [personagem, None, None, item1,   None  ],
-            [None,       barreira1, None, barreira1, None  ],
-            [item1,    barreira1, None, None,  None  ],
-            [None,       None,  None, barreira1, objetivo],
-            [None,       None,  item1, None,  None  ],
-        ]
+        # 2. Atributo principal esperado pelo seu jogo.py
+        self.matriz = []
+
+        # Constrói o mapa dinamicamente se os dados do JSON existirem
+        if dados_fase and "mapa" in dados_fase:
+            self.construir_mapa(dados_fase["mapa"])
+        else:
+            # Fallback seguro para uma matriz vazia 5x5 caso o arquivo falhe
+            self.matriz = [[None for _ in range(5)] for _ in range(5)]
+
+    def construir_mapa(self, mapa_numerico):
+        """Converte a matriz numérica do JSON em instâncias de objetos Pygame."""
+        self.matriz = []
+        
+        for linha in mapa_numerico:
+            nova_linha = []
+            for celula in linha:
+                if celula == 1:
+                    nova_linha.append(Personagem(0, 0))
+                    
+                elif celula == 2:
+                    # Instancia uma barreira passando os argumentos que você já usa
+                    nova_linha.append(Barreira(50, (255, 0, 0)))
+                    
+                elif celula == 3:
+                    nova_linha.append(Item())
+                    
+                elif celula == 4:
+                    nova_linha.append(Objetivo())
+                    
+                else:
+                    nova_linha.append(None) # 0 = None
+            self.matriz.append(nova_linha)
 
     def _sprite_parede(self, i, j, rows, cols):
         topo = i == 0
