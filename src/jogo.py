@@ -8,6 +8,7 @@ from src.blocos import BlocoEsquerda, BlocoDireita, BlocoCima, BlocoBaixo, Bloco
 from src.comandos import BotaoDeploy, BotaoReset, Botao
 from src.matriz import Matriz
 from src.pontuacao import Pontuacao
+from src.menu import carregar_fonte
 
 class Jogo:
     def __init__(self):
@@ -16,6 +17,7 @@ class Jogo:
         pygame.display.set_caption("Perdido no Algoritmo - Protótipo")
         self.relogio = pygame.time.Clock()
         self.rodando = True
+        self.acao_final = None
         self.inicializar_elementos()
 
     def inicializar_elementos(self):
@@ -88,14 +90,20 @@ class Jogo:
         self.sep_y = [200, 270, 510]  # entre blocos/fila e fila/botões
 
         # --- Fonte maior e em negrito para os avisos de fim de jogo ---
-        self.fonte_status = pygame.font.SysFont("Arial", 50, bold=True)
+        self.fonte_status = carregar_fonte(27)
+        self.fonte_resultado = carregar_fonte(12)
+        self.fonte_botao_resultado = carregar_fonte(13)
+        self.estado_resultado = None
 
     def processar_eventos(self):
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
+                self.acao_final = "sair"
                 self.rodando = False
-                pygame.quit()
-                exit()
+
+            if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1 and self.estado_resultado:
+                self._processar_clique_resultado(evento.pos)
+                continue
 
             if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
                 pos_mouse = evento.pos
@@ -145,7 +153,54 @@ class Jogo:
                         self.bloco_repetir_paleta.n = self.n_repeticoes
 
     def atualizar(self):
+        if self.estado_resultado:
+            return
         self.personagem.atualizar_movimento(self.matriz)
+        if self.personagem.chegou_no_objetivo:
+            self.estado_resultado = "vitoria"
+        elif self.personagem.vidas <= 0:
+            self.estado_resultado = "derrota"
+
+    def _obter_botoes_resultado(self):
+        largura, altura = 240, 44
+        x = (LARGURA_TELA - largura) // 2
+        if self.estado_resultado == "vitoria":
+            opcoes = [
+                ("Próxima Fase", "proxima_fase"),
+                ("Repetir Fase", "repetir_fase"),
+                ("Menu Principal", "menu_principal"),
+            ]
+        else:
+            opcoes = [
+                ("Tentar Novamente", "repetir_fase"),
+                ("Menu Principal", "menu_principal"),
+            ]
+        inicio_y = 285 if len(opcoes) == 3 else 310
+        return [
+            (pygame.Rect(x, inicio_y + indice * 58, largura, altura), texto, acao)
+            for indice, (texto, acao) in enumerate(opcoes)
+        ]
+
+    def _reiniciar_fase(self):
+        self.inicializar_elementos()
+        self.personagem.linha = self.personagem.linha_inicial
+        self.personagem.coluna = self.personagem.coluna_inicial
+        self.personagem.vidas = 3
+        self.personagem.chegou_no_objetivo = False
+        self.personagem.executando_comandos = False
+        self.personagem.indice_comando_atual = 0
+        self.personagem.comandos_expandidos = []
+
+    def _processar_clique_resultado(self, pos_mouse):
+        for rect, _, acao in self._obter_botoes_resultado():
+            if not rect.collidepoint(pos_mouse):
+                continue
+            if acao == "repetir_fase":
+                self._reiniciar_fase()
+            else:
+                self.acao_final = acao
+                self.rodando = False
+            return
 
     # ── Loop helpers ────────────────────────────────────────────────────────
 
@@ -320,20 +375,48 @@ class Jogo:
 
 
 
-        if self.personagem.chegou_no_objetivo:
-            surf_texto = self.fonte_status.render("PARABÉNS!", True, (0, 255, 0))
-           
-            rect_texto = surf_texto.get_rect(center=(self.PAINEL_X // 2, ALTURA_TELA // 6))
-            self.tela.blit(surf_texto, rect_texto)
-
-    
-        elif self.personagem.vidas <= 0:
-            surf_texto = self.fonte_status.render("GAME OVER", True, (255, 0, 0))
-            rect_texto = surf_texto.get_rect(center=(self.PAINEL_X // 2, ALTURA_TELA // 6))
-            self.tela.blit(surf_texto, rect_texto)
+        if self.estado_resultado:
+            self._desenhar_tela_resultado()
 
 
         pygame.display.update()
+
+    def _desenhar_tela_resultado(self):
+        sobreposicao = pygame.Surface((LARGURA_TELA, ALTURA_TELA), pygame.SRCALPHA)
+        sobreposicao.fill((0, 0, 0, 185))
+        self.tela.blit(sobreposicao, (0, 0))
+
+        painel = pygame.Rect(390, 130, 420, 350)
+        pygame.draw.rect(self.tela, (25, 30, 55), painel)
+        pygame.draw.rect(self.tela, (170, 190, 255), painel, 3)
+
+        if self.estado_resultado == "vitoria":
+            titulo, cor, descricoes = "RODOU LISO!", (80, 230, 130), (
+                "Código sem bugs!",
+            )
+        else:
+            titulo, cor, descricoes = "GAME OVER!", (240, 90, 90), (
+                "Você está a um laço",
+                "da vitória!",
+            )
+
+        titulo_surface = self.fonte_status.render(titulo, True, cor)
+        titulo_rect = titulo_surface.get_rect(center=(LARGURA_TELA // 2, 195))
+        self.tela.blit(titulo_surface, titulo_rect)
+
+        for indice, descricao in enumerate(descricoes):
+            descricao_surface = self.fonte_resultado.render(descricao, True, (255, 255, 255))
+            descricao_rect = descricao_surface.get_rect(center=(LARGURA_TELA // 2, 235 + indice * 20))
+            self.tela.blit(descricao_surface, descricao_rect)
+
+        for rect, texto, _ in self._obter_botoes_resultado():
+            hover = rect.collidepoint(pygame.mouse.get_pos())
+            cor_botao = (75, 105, 180) if hover else (45, 65, 125)
+            pygame.draw.rect(self.tela, cor_botao, rect)
+            pygame.draw.rect(self.tela, (220, 230, 255), rect, 2)
+            texto_surface = self.fonte_botao_resultado.render(texto, True, (255, 255, 255))
+            texto_rect = texto_surface.get_rect(center=rect.center)
+            self.tela.blit(texto_surface, texto_rect)
 
     def rodar(self):
         while self.rodando:
@@ -341,3 +424,4 @@ class Jogo:
             self.atualizar()
             self.desenhar()
             self.relogio.tick(FPS)
+        return self.acao_final

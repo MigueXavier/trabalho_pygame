@@ -10,13 +10,19 @@ if __name__ == "__main__":
     pygame.display.set_caption("Perdido no Algoritmo")
     relogio = pygame.time.Clock()
 
-    menu = Menu(tela, relogio)
-    acao = menu.rodar()
+    executando = True
+    while executando:
+        menu = Menu(tela, relogio)
+        acao = menu.rodar()
 
-    if acao == "novo_jogo":
-        meu_jogo = Jogo()
-        meu_jogo.rodar()
-    elif acao == "sair":
-        pygame.quit()
-        exit()
+        if acao == "sair":
+            executando = False
+        elif acao == "novo_jogo":
+            meu_jogo = Jogo()
+            resultado = meu_jogo.rodar()
+            if resultado == "sair":
+                executando = False
+
+    pygame.quit()
+    exit()
 
