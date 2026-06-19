@@ -9,6 +9,7 @@ from src.blocos import BlocoEsquerda, BlocoDireita, BlocoCima, BlocoBaixo, Bloco
 from src.comandos import BotaoDeploy, BotaoReset, Botao
 from src.matriz import Matriz
 from src.pontuacao import Pontuacao
+from src.menu import carregar_fonte
 
 class Jogo:
     def __init__(self):
@@ -17,20 +18,17 @@ class Jogo:
         pygame.display.set_caption("Perdido no Algoritmo - Protótipo")
         self.relogio = pygame.time.Clock()
         self.rodando = True
-        
         self.faseAtual = 1
-
-        # Carrega o arquivo de configuração da fase atual
         with open(f"fases/fase_{self.faseAtual}.json", "r", encoding="utf-8") as arquivo:
             dados_fase = json.load(arquivo)
         self.dados = dados_fase
         self.objeto_matriz = Matriz(dados_fase)
         self.matriz = self.objeto_matriz.matriz
-
+        self.acao_final = None
         self.inicializar_elementos()
 
     def inicializar_elementos(self):
-        # Localiza o personagem dentro da matriz gerada
+
         self.personagem = None
         for linha in self.matriz:
             for celula in linha:
@@ -44,16 +42,16 @@ class Jogo:
         self.pontuacao = Pontuacao()
         self.fonte = pygame.font.Font(None, 36)
 
-        # Divisão da tela
-        self.PAINEL_X = LARGURA_TELA // 2  # x=400
 
-        # Centro do painel direito
-        centro = self.PAINEL_X + (LARGURA_TELA - self.PAINEL_X) // 2  # x=600
+        self.PAINEL_X = LARGURA_TELA // 2
 
-        # ── Seção 1: Blocos de direção Dinâmicos (Grade 2 Colunas) ──
+
+        centro = self.PAINEL_X + (LARGURA_TELA - self.PAINEL_X) // 2
+
+
         bloco_w, bloco_h = 80, 30
         gap = 10
-        grade_x = centro - bloco_w - gap // 2  # x da coluna esquerda
+        grade_x = centro - bloco_w - gap // 2
         y_inicial = 80
 
         classes_blocos = {
@@ -65,10 +63,10 @@ class Jogo:
 
         self.blocos_paleta = {}
         
-        # Recupera a lista do JSON através do objeto matriz
+
         blocos_fase = self.dados.get("blocos_disponiveis", ["cima", "baixo", "esquerda", "direita"])
 
-        # Contador real para indexar corretamente apenas os blocos direcionais na grade
+
         idx_direcional = 0
         for indice, nome_bloco in enumerate(blocos_fase):
             if nome_bloco == "repetir":
@@ -81,25 +79,25 @@ class Jogo:
                 x_dinamico = grade_x + coluna * (bloco_w + gap)
                 y_dinamico = y_inicial + linha * (bloco_h + gap)
 
-                # Em vez de clonar um objeto existente com copy, instanciamos um novo 
-                # a partir da classe mapeada. Isso garante que o Pygame crie um Rect 
-                # e superfícies limpas e independentes nas coordenadas corretas.
+
+
+
                 ClasseDoBloco = classes_blocos[nome_bloco]
                 bloco_instanciado = ClasseDoBloco(x_dinamico, y_dinamico)
 
-                # Usamos uma chave única (ex: "cima_0", "cima_1") para que, se houver
-                # blocos repetidos na lista da fase, um não sobrescreva o outro no dicionário.
+
+
                 chave_unica = f"{nome_bloco}_{indice}"
                 self.blocos_paleta[chave_unica] = bloco_instanciado
                 
                 idx_direcional += 1
 
-        # ── Bloco de repetição + controles de n (Y Calculado Dinamicamente) ──
+
         self.n_repeticoes = 2
         self.modo_loop = False
         self.loop_ativo = None
 
-        # O Y agora se adapta com base em quantas linhas de blocos de direção foram criadas
+
         linhas_totais = (len(self.blocos_paleta) + 1) // 2
         y_repetir = y_inicial + linhas_totais * (bloco_h + gap)
 
@@ -108,16 +106,16 @@ class Jogo:
         self.botao_mais  = Botao(grade_x + 25,      y_repetir + 3, 22, 26, (100, 100, 100))
         self.botao_fechar_loop = Botao(centro - 75, y_repetir + 53, 150, 30, (0, 160, 0))
 
-        # Font cached for UI labels
+
         self._fonte_ui = pygame.font.SysFont(None, 20)
 
-        # ── Seção 2: Fila de comandos ────────────────────────────────
+
         self.lista_pecas    = []
         self.pos_x_inicial  = self.PAINEL_X + 10
-        self.pos_y_lista    = 290   # abaixo da linha separadora do meio
-        self.espacamento    = 90    # 80px bloco + 10px gap
+        self.pos_y_lista    = 290
+        self.espacamento    = 90
 
-        # ── Seção 3: Deploy + Reset ──────────────────────────────────
+
         btn_w = 120
         btn_gap = 20
         btn_total = btn_w * 2 + btn_gap
@@ -125,24 +123,29 @@ class Jogo:
         self.botao_deploy = BotaoDeploy(btn_x,           530)
         self.botao_reset  = BotaoReset( btn_x + btn_w + btn_gap, 530)
 
-        # Linhas separadoras do painel (y fixos)
+
         self.sep_y = [200, 270, 510]
 
-        # Fonte para avisos de fim de jogo
-        self.fonte_status = pygame.font.SysFont("Arial", 50, bold=True)
+        self.fonte_status = carregar_fonte(27)
+        self.fonte_resultado = carregar_fonte(12)
+        self.fonte_botao_resultado = carregar_fonte(13)
+        self.estado_resultado = None
 
     def processar_eventos(self):
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
+                self.acao_final = "sair"
                 self.rodando = False
-                pygame.quit()
-                exit()
+
+            if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1 and self.estado_resultado:
+                self._processar_clique_resultado(evento.pos)
+                continue
 
             if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
                 pos_mouse = evento.pos
 
                 if self.modo_loop:
-                    # ── Modo Gravação de Loop ──
+
                     clicou_bloco = False
                     for nome, bloco in self.blocos_paleta.items():
                         if bloco.checar_clique(pos_mouse):
@@ -156,7 +159,7 @@ class Jogo:
                         elif self.botao_reset.checar_clique(pos_mouse):
                             self._reset_completo()
                 else:
-                    # ── Modo Normal ──
+
                     clicou_bloco = False
                     for nome, bloco in self.blocos_paleta.items():
                         if bloco.checar_clique(pos_mouse) and not bloco.clicado:
@@ -166,7 +169,7 @@ class Jogo:
                             break
                     
                     if not clicou_bloco:
-                        # Checa se o bloco repetir está disponível nesta fase antes de aceitar cliques
+
                         blocos_fase = self.dados.get("blocos_disponiveis", [])
                         if "repetir" in blocos_fase and self.bloco_repetir_paleta.checar_clique(pos_mouse):
                             self._iniciar_loop()
@@ -182,7 +185,56 @@ class Jogo:
                             self.bloco_repetir_paleta.n = self.n_repeticoes
 
     def atualizar(self):
+        if self.estado_resultado:
+            return
         self.personagem.atualizar_movimento(self.matriz)
+        if self.personagem.chegou_no_objetivo:
+            self.estado_resultado = "vitoria"
+        elif self.personagem.vidas <= 0:
+            self.estado_resultado = "derrota"
+
+    def _obter_botoes_resultado(self):
+        largura, altura = 240, 44
+        x = (LARGURA_TELA - largura) // 2
+        if self.estado_resultado == "vitoria":
+            opcoes = [
+                ("Próxima Fase", "proxima_fase"),
+                ("Repetir Fase", "repetir_fase"),
+                ("Menu Principal", "menu_principal"),
+            ]
+        else:
+            opcoes = [
+                ("Tentar Novamente", "repetir_fase"),
+                ("Menu Principal", "menu_principal"),
+            ]
+        inicio_y = 285 if len(opcoes) == 3 else 310
+        return [
+            (pygame.Rect(x, inicio_y + indice * 58, largura, altura), texto, acao)
+            for indice, (texto, acao) in enumerate(opcoes)
+        ]
+
+    def _reiniciar_fase(self):
+        self.objeto_matriz = Matriz(self.dados)
+        self.matriz = self.objeto_matriz.matriz
+        self.inicializar_elementos()
+        self.personagem.linha = self.personagem.linha_inicial
+        self.personagem.coluna = self.personagem.coluna_inicial
+        self.personagem.vidas = 3
+        self.personagem.chegou_no_objetivo = False
+        self.personagem.executando_comandos = False
+        self.personagem.indice_comando_atual = 0
+        self.personagem.comandos_expandidos = []
+
+    def _processar_clique_resultado(self, pos_mouse):
+        for rect, _, acao in self._obter_botoes_resultado():
+            if not rect.collidepoint(pos_mouse):
+                continue
+            if acao == "repetir_fase":
+                self._reiniciar_fase()
+            else:
+                self.acao_final = acao
+                self.rodando = False
+            return
 
     def _iniciar_loop(self):
         self.modo_loop = True
@@ -199,10 +251,10 @@ class Jogo:
         self.bloco_repetir_paleta.cor = (220, 130, 0)
 
     def _reset_completo(self):
-        # Executa a ação padrão do botão reset passando os blocos da paleta ativa de forma segura
+
         self.botao_reset.acao(self.lista_pecas, self.blocos_paleta)
         
-        # O restante do reset do bloco de repetir e pontuação continua igual:
+
         self.modo_loop = False
         self.loop_ativo = None
         self.bloco_repetir_paleta.clicado = False
@@ -255,15 +307,15 @@ class Jogo:
     def desenhar(self):
         self.tela.fill(CORES["FUNDO"])
 
-        # Linha divisória vertical principal
+
         pygame.draw.line(self.tela, CORES["COR_LINHA"],
                          (self.PAINEL_X, 0), (self.PAINEL_X, ALTURA_TELA), 2)
 
-        # Linhas separadoras translúcidas no painel
+
         for y in self.sep_y:
             self._desenhar_linha_translucida(y)
 
-        # ── Matriz à esquerda ──
+
         cols = len(self.matriz[0])
         rows = len(self.matriz)
 
@@ -274,7 +326,7 @@ class Jogo:
         offset_x = (self.PAINEL_X - total_cols * TAMANHO_CELULA) // 2
         offset_y = (ALTURA_TELA  - total_rows * TAMANHO_CELULA) // 2
 
-        # 1. Desenha as paredes externas
+
         for i in range(total_rows):
             for j in range(total_cols):
                 x = offset_x + j * TAMANHO_CELULA
@@ -283,7 +335,7 @@ class Jogo:
                 if sprite_p:
                     self.tela.blit(sprite_p, (x, y))
 
-        # 2. Desenha o interior (Células e Entidades)
+
         for i in range(rows):
             for j in range(cols):
                 x = offset_x + (j + BORDA) * TAMANHO_CELULA
@@ -301,11 +353,11 @@ class Jogo:
                     else:
                         celula.desenhar(self.tela, x, y)
 
-        # ── Painel direito: Renderização Dinâmica de Blocos ──
+
         for bloco in self.blocos_paleta.values():
             bloco.desenhar(self.tela)
 
-        # Interface do Bloco de Repetição (Apenas se disponível no JSON)
+
         blocos_fase = self.dados.get("blocos_disponiveis", [])
         if "repetir" in blocos_fase:
             self.botao_menos.desenhar(self.tela)
@@ -338,17 +390,47 @@ class Jogo:
         texto = self.fonte.render(f"Pontos: {self.pontuacao.pontos}", True, (255, 255, 255))
         self.tela.blit(texto, (10, 10))
 
-        # Telas de Vitória ou Derrota
-        if self.personagem.chegou_no_objetivo:
-            surf_texto = self.fonte_status.render("PARABÉNS!", True, (0, 255, 0))
-            rect_texto = surf_texto.get_rect(center=(self.PAINEL_X // 2, ALTURA_TELA // 6))
-            self.tela.blit(surf_texto, rect_texto)
-        elif self.personagem.vidas <= 0:
-            surf_texto = self.fonte_status.render("GAME OVER", True, (255, 0, 0))
-            rect_texto = surf_texto.get_rect(center=(self.PAINEL_X // 2, ALTURA_TELA // 6))
-            self.tela.blit(surf_texto, rect_texto)
+        if self.estado_resultado:
+            self._desenhar_tela_resultado()
 
         pygame.display.update()
+
+    def _desenhar_tela_resultado(self):
+        sobreposicao = pygame.Surface((LARGURA_TELA, ALTURA_TELA), pygame.SRCALPHA)
+        sobreposicao.fill((0, 0, 0, 185))
+        self.tela.blit(sobreposicao, (0, 0))
+
+        painel = pygame.Rect(390, 130, 420, 350)
+        pygame.draw.rect(self.tela, (25, 30, 55), painel)
+        pygame.draw.rect(self.tela, (170, 190, 255), painel, 3)
+
+        if self.estado_resultado == "vitoria":
+            titulo, cor, descricoes = "RODOU LISO!", (80, 230, 130), (
+                "Código sem bugs!",
+            )
+        else:
+            titulo, cor, descricoes = "GAME OVER!", (240, 90, 90), (
+                "Você está a um laço",
+                "da vitória!",
+            )
+
+        titulo_surface = self.fonte_status.render(titulo, True, cor)
+        titulo_rect = titulo_surface.get_rect(center=(LARGURA_TELA // 2, 195))
+        self.tela.blit(titulo_surface, titulo_rect)
+
+        for indice, descricao in enumerate(descricoes):
+            descricao_surface = self.fonte_resultado.render(descricao, True, (255, 255, 255))
+            descricao_rect = descricao_surface.get_rect(center=(LARGURA_TELA // 2, 235 + indice * 20))
+            self.tela.blit(descricao_surface, descricao_rect)
+
+        for rect, texto, _ in self._obter_botoes_resultado():
+            hover = rect.collidepoint(pygame.mouse.get_pos())
+            cor_botao = (75, 105, 180) if hover else (45, 65, 125)
+            pygame.draw.rect(self.tela, cor_botao, rect)
+            pygame.draw.rect(self.tela, (220, 230, 255), rect, 2)
+            texto_surface = self.fonte_botao_resultado.render(texto, True, (255, 255, 255))
+            texto_rect = texto_surface.get_rect(center=rect.center)
+            self.tela.blit(texto_surface, texto_rect)
 
     def rodar(self):
         while self.rodando:
@@ -356,3 +438,4 @@ class Jogo:
             self.atualizar()
             self.desenhar()
             self.relogio.tick(FPS)
+        return self.acao_final
