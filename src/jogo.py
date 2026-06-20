@@ -939,16 +939,13 @@ class Jogo:
 
         explicacao_arrasta = "Arrastar: reorganiza | Clicar: apaga"
         linhas_arrasta = self._quebrar_texto_em_linhas(explicacao_arrasta, self._fonte_como_jogar, largura_texto)
-        print(f"y atual: {y}, bottom: {self.area_como_jogar.bottom}, sobra: {self.area_como_jogar.bottom - y}")
         for linha in linhas_arrasta:
             if y + 14 > self.area_como_jogar.bottom:
                 return
             texto = self._fonte_como_jogar.render(linha, True, (200, 200, 200))
             self.tela.blit(texto, (x_texto, y))
             y += 15
-            print(f"y atual: {y}, bottom: {self.area_como_jogar.bottom}, sobra: {self.area_como_jogar.bottom - y}")
-
-    def _calcular_indice_insercao(self, pos_mouse):
+            
         inicio_y = self.area_sequencia.y + 60
         altura_bloco = 45
         espacamento_y = 15
