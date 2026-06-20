@@ -7,9 +7,9 @@ TITULO       = "Perdido no Algoritmo"
 # ── Grade / Mapa ──────────────────────────────────────────────────────────────
 TAMANHO_CELULA = 48   # px por célula da grade
 margem = 15
-PROP_COMO_JOGAR = 0.24      
-PROP_BLOCOS = 0.20  
-PROP_SEQUENCIA = 0.47       
+PROP_COMO_JOGAR = 0.26     
+PROP_BLOCOS = 0.19
+PROP_SEQUENCIA = 0.46       
 
 # ── Cores (R, G, B) ───────────────────────────────────────────────────────────
 CORES = {

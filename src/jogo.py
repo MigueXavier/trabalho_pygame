@@ -109,7 +109,7 @@ class Jogo:
         bloco_w = 80
         bloco_h = 35
 
-        y_inicial = self.area_blocos.y + 45
+        y_inicial = self.area_blocos.centery - bloco_h // 2 - 10
 
         classes_blocos = {
             "cima": BlocoCima,
@@ -924,6 +924,7 @@ class Jogo:
         y += 8  
 
         explicacao_loop = "loop = quantidade de vezes que deve repetir o movimento"
+        explicacao_arrasta = "Arrastar: reorganiza os blocos | Clicar: apaga o bloco"
         linhas_loop = self._quebrar_texto_em_linhas(explicacao_loop, self._fonte_como_jogar, largura_texto)
 
         for linha in linhas_loop:
@@ -933,6 +934,19 @@ class Jogo:
             texto = self._fonte_como_jogar.render(linha, True, (255, 255, 255))
             self.tela.blit(texto, (x_texto, y))
             y += 15
+
+        y += 4
+
+        explicacao_arrasta = "Arrastar: reorganiza | Clicar: apaga"
+        linhas_arrasta = self._quebrar_texto_em_linhas(explicacao_arrasta, self._fonte_como_jogar, largura_texto)
+        print(f"y atual: {y}, bottom: {self.area_como_jogar.bottom}, sobra: {self.area_como_jogar.bottom - y}")
+        for linha in linhas_arrasta:
+            if y + 14 > self.area_como_jogar.bottom:
+                return
+            texto = self._fonte_como_jogar.render(linha, True, (200, 200, 200))
+            self.tela.blit(texto, (x_texto, y))
+            y += 15
+            print(f"y atual: {y}, bottom: {self.area_como_jogar.bottom}, sobra: {self.area_como_jogar.bottom - y}")
 
     def _calcular_indice_insercao(self, pos_mouse):
         inicio_y = self.area_sequencia.y + 60
