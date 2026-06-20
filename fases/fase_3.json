@@ -1,15 +1,11 @@
 {
-  "nome": "Condicionais",
-  "descricao": "Use blocos IF e OR para navegar pelos caminhos alternativos.",
-  "limite_blocos": 10,
-  "posicao_inicial": [1, 4],
+  "fase": 3,
+  "blocos_disponiveis": ["cima", "baixo", "esquerda", "direita","direita","cima", "repetir"],
   "mapa": [
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-    [2, 0, 3, 0, 2, 0, 3, 0, 2, 0, 3, 0, 2],
-    [2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2],
-    [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2],
-    [2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2],
-    [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 2],
-    [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+    [1, 0, 0, 3, 2],
+    [0, 2, 0, 0, 2],
+    [0, 2, 3, 0, 2],
+    [0, 2, 0, 0, 4],
+    [3, 0, 0, 0, 3]
   ]
 }

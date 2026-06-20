@@ -1,4 +1,5 @@
 import pygame
+import random
 from src.configuracao import TAMANHO_CELULA, CORES
 from src.item import Item
 from src.objetivo import Objetivo
@@ -11,6 +12,24 @@ class Personagem:
 
         self.sprite = pygame.image.load("assets/sprites/sprits-jogo-python/personagem1.png").convert_alpha()
         self.sprite = pygame.transform.scale(self.sprite, (TAMANHO_CELULA, TAMANHO_CELULA))
+
+        self.sons_passo = [
+            pygame.mixer.Sound("assets/sons/step_1.mp3"),
+            pygame.mixer.Sound("assets/sons/step_2.mp3"),
+            pygame.mixer.Sound("assets/sons/step_3.mp3")
+        ]
+
+        for som in self.sons_passo:
+            som.set_volume(0.05)
+
+        self.som_coleta = pygame.mixer.Sound("assets/sons/coleta_itens.mp3")
+        self.som_coleta.set_volume(0.15)
+
+        self.som_bater = pygame.mixer.Sound("assets/sons/bater_caixa.mp3")
+        self.som_bater.set_volume(0.10)
+
+        self.som_perder_vida = pygame.mixer.Sound("assets/sons/perder_vida.mp3")
+        self.som_perder_vida.set_volume(0.15)
 
 
         self.linha_inicial = linha_inicio
@@ -77,6 +96,7 @@ class Personagem:
                 elemento_destino = matriz_jogo[nova_linha][nova_coluna]
                 if elemento_destino is None or elemento_destino == self or isinstance(elemento_destino, Item) or isinstance(elemento_destino, Objetivo):
                     if isinstance(elemento_destino, Item):
+                        self.som_coleta.play()
                         matriz_jogo[nova_linha][nova_coluna] = None
                         if self._pontuacao is not None:
                             self._pontuacao.adicionar_pontos()
@@ -86,8 +106,10 @@ class Personagem:
                     matriz_jogo[self.linha][self.coluna] = None
                     self.linha = nova_linha
                     self.coluna = nova_coluna
+                    random.choice(self.sons_passo).play()
                     matriz_jogo[self.linha][self.coluna] = self
-
+                else:
+                    self.som_bater.play()
             self.indice_comando_atual += 1
             self.tempo_ultimo_passo = agora
         else:
@@ -95,6 +117,7 @@ class Personagem:
 
             if not self.chegou_no_objetivo:
                 self.vidas -= 1
+                self.som_perder_vida.play()
                 print(f"Comandos terminaram! Você não chegou ao objetivo. Vidas restantes: {self.vidas}")
 
                 if self.vidas > 0:

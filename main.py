@@ -2,12 +2,12 @@ import pygame
 from sys import exit
 from src.menu import Menu
 from src.jogo import Jogo
-
-jogo = Jogo()
+from src.dados import Data, dados_padrao
+from src.configuracao import *
 
 if __name__ == "__main__":
     pygame.init()
-    tela = jogo.tela
+    tela = Jogo().tela
     pygame.display.set_caption("Perdido no Algoritmo")
     relogio = pygame.time.Clock()
 
@@ -18,7 +18,15 @@ if __name__ == "__main__":
 
         if acao == "sair":
             executando = False
+
         elif acao == "novo_jogo":
+            Data.salvar_dados(dados_padrao)
+            meu_jogo = Jogo()
+            resultado = meu_jogo.rodar()
+            if resultado == "sair":
+                executando = False
+
+        elif acao == "continuar":
             meu_jogo = Jogo()
             resultado = meu_jogo.rodar()
             if resultado == "sair":
@@ -26,4 +34,3 @@ if __name__ == "__main__":
 
     pygame.quit()
     exit()
-

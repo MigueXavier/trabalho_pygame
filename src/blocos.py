@@ -11,7 +11,7 @@ class Bloco:
         self.cor = cor
      
         pygame.font.init()
-        self.fonte = pygame.font.SysFont("Arial", 16, bold=True)
+        self.fonte = pygame.font.Font("assets/fontes/PressStart2P.ttf", 14)
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -19,7 +19,7 @@ class Bloco:
         memo[id(self)] = novo
         for k, v in self.__dict__.items():
             if isinstance(v, pygame.font.Font):
-                setattr(novo, k, pygame.font.SysFont("Arial", 16, bold=True))
+                setattr(novo, k, pygame.font.Font("assets/fontes/PressStart2P.ttf", 14))
             else:
                 setattr(novo, k, copy.deepcopy(v, memo))
         return novo
@@ -30,10 +30,10 @@ class Bloco:
 
         if hasattr(self, 'tipo'):
             setas = {
-                "direita": "->",
-                "esquerda": "<-",
-                "cima": "^",
-                "baixo": "v"
+                "direita": "→",
+                "esquerda": "←",
+                "cima": "↑",
+                "baixo": "↓"
             }
             
             if self.tipo in setas:

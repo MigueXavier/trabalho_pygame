@@ -61,27 +61,15 @@
 
 ## Sobre o Jogo
 
-<div align="center">
-
-</div>
-
 **Perdido no Algoritmo** é um jogo de labirinto simples onde o jogador não controla o personagem diretamente — ele **monta algoritmos** com blocos de programação para mover o personagem pelo cenário.
 
-Na tela aparecem um personagem, diferentes cenários organizados em uma grade, e objetos relacionados aos desafios de cada fase: estrelas para coletar, livros, interruptores, portas, obstáculos e um painel com blocos de comandos. Por meio desse painel, o jogador faz o personagem andar, virar, coletar itens, ativar mecanismos e tomar decisões.
+Na tela aparecem um personagem, diferentes cenários organizados em uma grade, e objetos relacionados aos desafios de cada fase: itens para coletar, obstáculos, o objetivo final e um painel com blocos de comandos. Por meio desse painel, o jogador monta uma sequência de comandos (incluindo blocos de repetição) e executa essa sequência para fazer o personagem andar, coletar itens e chegar ao objetivo.
 
-Conforme as fases avançam, torna-se necessário utilizar estruturas condicionais (`IF` e `ELSE`) e laços de repetição (`WHILE` e `FOR`), além de estratégias para contornar obstáculos e resolver problemas de forma eficiente.
-
-> **Status do protótipo (Semana 2):** esta versão valida a base técnica do projeto — janela do Pygame, loop principal, movimentação, colisões, pontuação, vidas, recorde e ranking. O sistema de **blocos de programação** descrito acima é o conceito-alvo do jogo e será incorporado nas entregas das Semanas 3 e 4. Por enquanto, o personagem é controlado diretamente pelo teclado.
+Conforme as fases avançam, torna-se necessário utilizar o bloco de repetição (`Rep xN`) e estratégias para contornar obstáculos e resolver o trajeto no menor número de comandos possível.
 
 ---
 
 ## Como Jogar
-
-<div align="center">
-
-![How to play gif](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMTZlMHU4NmRrd3VkZWc5ajlvcGhsNmF4MHd4MGF5ZTR4bGloNzA2YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/077i6AULCXc0FKTj9s/giphy.gif)
-
-</div>
 
 <div align="center">
 
@@ -92,7 +80,7 @@ Conforme as fases avançam, torna-se necessário utilizar estruturas condicionai
 │              ↓                                           │
 │  2. Monte sua sequência de blocos no painel              │
 │              ↓                                           │
-│  3. Pressione ENTER para executar                        │
+│  3. Clique em EXECUTAR para rodar a sequência             │
 │              ↓                                           │
 │  4. Observe o personagem seguindo seus comandos          │
 │              ↓                                           │
@@ -102,17 +90,14 @@ Conforme as fases avançam, torna-se necessário utilizar estruturas condicionai
 ```
 
 </div>
+
 ---
 
 ## Objetivos
 
-<div align="center">
-
-</div>
-
 - Chegar até o final do labirinto
 - Coletar itens
-- Coletar os itens no **menor número de linhas de comando possível**
+- Coletar os itens no **menor número de comandos possível**
 - Evitar obstáculos
 
 ### Condição de vitória
@@ -121,7 +106,7 @@ Conforme as fases avançam, torna-se necessário utilizar estruturas condicionai
 
 ### Condição de derrota
 
-> Usar todos os movimentos disponíveis **ou** perder todas as vidas.
+> Perder todas as vidas sem chegar ao objetivo.
 
 ---
 
@@ -129,17 +114,14 @@ Conforme as fases avançam, torna-se necessário utilizar estruturas condicionai
 
 <div align="center">
 
-</div>
-<div align="center">
-
 | # | Regra |
 |---|-------|
 | 1 | O jogador começa no ponto **A** e deve chegar ao ponto **B** |
 | 2 | Para chegar ao ponto B, ele deve definir a movimentação com **blocos de programação** |
-| 3 | Há um **limite de comandos** para executar por fase |
-| 4 | Caso não consiga completar a fase, perde **uma vida** |
-| 5 | O jogador começa com **3 vidas** (tentativas) |
-| 6 | Caso as vidas acabem, retorna ao **começo do game** |
+| 3 | Caso não consiga completar a fase, perde **uma vida** |
+| 4 | O jogador começa com **3 vidas** (tentativas) por fase |
+| 5 | Caso as vidas acabem, a fase é reiniciada |
+| 6 | O progresso (fase atual e recorde) é salvo automaticamente ao voltar ao menu |
 
 </div>
 
@@ -147,32 +129,27 @@ Conforme as fases avançam, torna-se necessário utilizar estruturas condicionai
 
 ## Elementos do Jogo
 
-<div align="center">
-
-</div>
-
 ### Personagem principal
 
-Um personagem controlado pelos blocos de comando selecionados pelo jogador.
+Um personagem controlado pelos blocos de comando selecionados pelo jogador, com efeitos sonoros de passos, coleta e colisão.
 
 ### Obstáculos
 
-Barreiras que impedem a passagem do personagem: estantes, móveis, portas, etc.
+Barreiras que impedem a passagem do personagem.
 
 ### Itens de interação
 
-Livros aparecem na tela e aumentam a pontuação quando coletados.
+Itens coletáveis aumentam a pontuação quando coletados.
 
 ### Pontuação, Vidas e Progresso
 
 ```
 ♥ ♥ ♥  →  3 vidas iniciais
 
-📚 Coletar um livro    → +10 pontos
-💀 Perder todas vidas  → volta ao início
+⭐ Coletar um item     → +10 pontos
+💀 Perder todas vidas  → reinicia a fase
+🚪 Concluir as 3 fases → vitória final
 ```
-
-O jogador começa com uma quantidade limitada de ações por fase, 3 vidas, e ganha 10 pontos por item coletado.
 
 ---
 
@@ -202,12 +179,6 @@ pip install -r requirements.txt
 python main.py
 ```
 
-### Rodando os testes
-
-```bash
-python -m pytest tests/ -v
-```
-
 ---
 
 ## Controles
@@ -219,61 +190,58 @@ python -m pytest tests/ -v
 ║                MANUAL DE BLOCOS E BOTÕES                 ║
 ╠══════════════════════════════════════════════════════════╣
 ║                                                          ║
-║  [ -> ]  Bloco Direita   → Move o personagem 1 casa      ║
+║  [ → ]  Bloco Direita    → Move o personagem 1 casa      ║
 ║                            para a direita                ║
-║  [ <- ]  Bloco Esquerda  → Move o personagem 1 casa      ║
+║  [ ← ]  Bloco Esquerda   → Move o personagem 1 casa      ║
 ║                            para a esquerda               ║
-║  [  ^ ]  Bloco Cima      → Move o personagem 1 casa      ║
+║  [ ↑ ]  Bloco Cima       → Move o personagem 1 casa      ║
 ║                            para cima                     ║
-║  [  v ]  Bloco Baixo     → Move o personagem 1 casa      ║
+║  [ ↓ ]  Bloco Baixo      → Move o personagem 1 casa      ║
 ║                            para baixo                    ║
 ║                                                          ║
-║  [Rep xN] Bloco Repetir  → Multiplica por N todos os     ║
-║                            blocos inseridos dentro dele  ║
+║  [Rep xN] Bloco Repetir  → Repete N vezes os blocos       ║
+║                            inseridos dentro dele          ║
+║                                                          ║
+║  Clique num bloco já colocado na sequência para           ║
+║  removê-lo dela.                                          ║
 ║                                                          ║
 ║ ════════════════════════════════════════════════════════ ║
 ║                                                          ║
-║  [ Deploy ] Botão Azul   → Compila e executa a fila de   ║
-║                            comandos no personagem        ║
-║                                                          ║
-║  [ Reset  ] Botão Amarelo→ Limpa a fila de comandos e    ║
-║                            reseta os blocos da paleta    ║
+║  [ EXECUTAR ] → Roda a sequência de comandos montada      ║
+║  [ RESET    ] → Limpa a sequência e reabilita os blocos   ║
+║  [ SAIR     ] → Salva o progresso e volta ao menu          ║
 ║                                                          ║
 ╚══════════════════════════════════════════════════════════╝
 ```
 
 </div>
 
-
 ---
 
-## Arquitetura do Código
-
-<div align="center">
-
-![Code gif](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcWd3am0yY3hoaWhuMGNibW5pbHg2d201NzN0NTR3bzVjdXo5Nmp0eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/qgQUggAC3Pfv687qPC/giphy.gif)
-
-</div>
+## Organização do Código
 
 ```
-main.py              →  ponto de entrada que inicializa o jogo
+main.py              →  ponto de entrada; controla o loop Menu ⇄ Jogo
 
 src/
-├── jogo.py          →  loop principal e máquina de estados (menu, jogando, game over)
-├── config.py        →  constantes globais (tela, cores, gameplay, atlas, caminhos)
-├── entidades.py     →  criação e movimentação do jogador, gema e inimigo
-├── sprites.py       →  recorte de sprites a partir da spritesheet
-├── interface.py     →  HUD on-screen, tela de menu e tela de fim de jogo
-├── dados.py         →  leitura e escrita de recorde e ranking em arquivo
-└── funcoes.py       →  funções puras de lógica do jogo (testáveis)
+├── jogo.py          →  loop principal, montagem da sequência, execução e telas de resultado
+├── menu.py          →  menu inicial (Novo Jogo / Continuar / Créditos / Sair)
+├── configuracao.py  →  constantes globais (tela, cores, layout, fases)
+├── personagem.py     →  movimentação do jogador e efeitos sonoros
+├── blocos.py         →  blocos de comando (direção e repetição)
+├── comandos.py        →  botão genérico reutilizado pela interface
+├── matriz.py          →  construção do labirinto a partir do JSON da fase
+├── barreira.py         →  obstáculos
+├── item.py             →  itens coletáveis
+├── objetivo.py          →  ponto de chegada da fase
+├── pontuacao.py          →  contagem de pontos
+└── dados.py              →  leitura/escrita do save (recorde e fase atual)
 
-data/
-├── recorde.txt      →  maior pontuação já alcançada
-└── ranking.txt      →  ranking das melhores partidas
-
-assets/imagens/      →  spritesheet utilizada pelo jogo
-tests/               →  testes automatizados (pytest)
-docs/proposta.md     →  proposta inicial do projeto
+fases/                →  definição de cada fase em JSON (mapa, blocos disponíveis)
+assets/fontes/        →  fonte pixelada usada na interface
+assets/sons/          →  trilha sonora e efeitos sonoros
+assets/sprites/       →  spritesheet e sprites do jogo
+tests/                →  script de verificação visual manual
 ```
 
 ---
@@ -281,60 +249,20 @@ docs/proposta.md     →  proposta inicial do projeto
 ## Recursos Externos
 
 - Imagens obtidas de banco gratuito
-- Efeitos sonoros obtidos de banco gratuito
-- Fonte personalizada
-
----
-
-## Principais Dificuldades Esperadas
-
-```
-→  Movimentação do jogador
-→  Organização do código
-→  Interface gráfica
-→  Modelagem das classes
-→  Uso do GitHub
-→  Testes
-→  Exibição de textos na tela
-```
-
----
-
-## Escopo Mínimo
-
-A versão mínima contará com **três fases completas e funcionais**, nas quais o jogador utilizará comandos de programação para conduzir o personagem até o objetivo final. Essa versão incluirá:
-
-- Movimentação do personagem
-- Obstáculos para desviar
-- Validação da sequência de comandos criada pelo jogador
+- Efeitos sonoros e trilha sonora obtidos de banco gratuito
+- Fonte personalizada (Press Start 2P)
 
 ---
 
 ## Melhorias Previstas
 
-<div align="center">
-
-</div>
-
 Caso haja tempo durante o desenvolvimento:
 
-- [ ] Coletar estrelas para pontuação e chaves para abrir portas e avançar fases
-- [ ] Sons gratuitos
 - [ ] Novas fases
 - [ ] Animações
 - [ ] Diferentes personagens
 - [ ] Novos tipos de obstáculos
 - [ ] Aumento de dificuldade
-
----
-
-## Time de Desenvolvimento
-
-<div align="center">
-
-![Team gif](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXc5YXo3MHgwMmo2Z3Z0OXB5NHBwbXU0Y2w5dWViMzlhemhoZWlsNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/LaVp0AyqR5bGsC5Cbm/giphy.gif)
-
-</div>
 
 ---
 

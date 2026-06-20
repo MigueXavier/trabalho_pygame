@@ -1,5 +1,6 @@
 import pygame
 from src.configuracao import LARGURA_TELA, ALTURA_TELA, FPS, CORES
+from src.dados import Data
 
 ESCALA = 3  
 FONTE_PIXEL = "assets/fontes/PressStart2P.ttf"
@@ -14,6 +15,8 @@ def carregar_fonte(tamanho):
 
 class BotaoMenu:
     def __init__(self, x, y, largura, altura, texto, desabilitado=False, tile=None):
+        self.som_clique = pygame.mixer.Sound("assets/sons/clique_botoes.mp3")
+        self.som_clique.set_volume(0.08)
         self.rect = pygame.Rect(x, y, largura, altura)
         self.texto = texto
         self.desabilitado = desabilitado
@@ -111,9 +114,11 @@ class Menu:
         inicio_y = 280
         gap = 14
 
+        tem_save = Data.existe_save()
+
         opcoes = [
             ("Novo Jogo", False, "novo_jogo"),
-            ("Continuar", True,  "continuar"),
+            ("Continuar", not tem_save, "continuar"),
             ("Créditos",  False, "creditos"),
             ("Sair",      False, "sair"),
         ]
@@ -185,8 +190,9 @@ class Menu:
             if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
                 for botao in self._botoes:
                     if botao.checar_clique(evento.pos):
+                        botao.som_clique.play()
                         self.acao = botao._acao
-                        if self.acao in ("novo_jogo", "sair"):
+                        if self.acao in ("novo_jogo", "continuar", "sair"):
                             self.rodando = False
 
     def desenhar(self):
