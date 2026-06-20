@@ -14,7 +14,7 @@ from src.pontuacao import Pontuacao
 from src.menu import carregar_fonte
 
 class Jogo:
-    def __init__(self):
+    def __init__(self, fase=1):
         if not pygame.get_init():
             pygame.init()   
         if not pygame.mixer.get_init():
@@ -37,8 +37,8 @@ class Jogo:
         pygame.display.set_caption("Perdido no Algoritmo - Protótipo")
         self.relogio = pygame.time.Clock()
         self.rodando = True
-        self.faseAtual = 1
-        with open(f"fases/fase_{self.faseAtual}.json", "r", encoding="utf-8") as arquivo:
+        self.faseAtual = fase
+        with open(f"fases/fase_{self.faseAtual}.json", "r", encoding="utf-8") as arquivo: 
             dados_fase = json.load(arquivo)
         self.dados = dados_fase
         self.objeto_matriz = Matriz(dados_fase)
