@@ -951,6 +951,15 @@ class Jogo:
         espacamento_y = 15
         y = inicio_y - self.scroll_y
         for i in range(len(self.lista_pecas) + 1):
+            y += altura_bloco + espacamento_y
+        return len(self.lista_pecas)
+
+    def _calcular_indice_insercao(self, pos_mouse):
+        inicio_y = self.area_sequencia.y + 60
+        altura_bloco = 45
+        espacamento_y = 15
+        y = inicio_y - self.scroll_y
+        for i in range(len(self.lista_pecas) + 1):
             if pos_mouse[1] < y + (altura_bloco + espacamento_y) // 2:
                 return i
             y += altura_bloco + espacamento_y
