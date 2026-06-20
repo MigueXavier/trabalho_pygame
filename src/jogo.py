@@ -9,7 +9,9 @@ from src.personagem import Personagem
 from src.blocos import BlocoEsquerda, BlocoDireita, BlocoCima, BlocoBaixo, BlocoRepetir
 from src.comandos import BotaoDeploy, BotaoReset, Botao
 from src.menu import carregar_fonte, BotaoMenu
+from src.matriz import Matriz
 from src.pontuacao import Pontuacao
+from src.menu import carregar_fonte
 
 class Jogo:
     def __init__(self):
@@ -35,10 +37,17 @@ class Jogo:
         pygame.display.set_caption("Perdido no Algoritmo - Protótipo")
         self.relogio = pygame.time.Clock()
         self.rodando = True
+        self.faseAtual = 1
+        with open(f"fases/fase_{self.faseAtual}.json", "r", encoding="utf-8") as arquivo:
+            dados_fase = json.load(arquivo)
+        self.dados = dados_fase
+        self.objeto_matriz = Matriz(dados_fase)
+        self.matriz = self.objeto_matriz.matriz
+        self.acao_final = None
         self.inicializar_elementos()
 
     def inicializar_elementos(self):
-
+    
         # Localiza o personagem dentro da matriz gerada
         self.personagem = None
         for linha in self.matriz:
@@ -54,6 +63,7 @@ class Jogo:
         self.personagem._pontuacao = self.pontuacao
         self.fonte = pygame.font.Font(None, 36)
 
+        # Divisão da tela
         self.PAINEL_X = LARGURA_TELA // 2  # x=400
 
         # Centro do painel direito
@@ -61,17 +71,6 @@ class Jogo:
         painel_largura = LARGURA_TELA - self.PAINEL_X
         self.PAINEL_LARGURA = painel_largura
 
-        # ── Seção 1: Blocos de direção (grade 2x2) ──────────────────
-        # Cada bloco: 80x30. Espaçamento horizontal: 10px entre colunas
-        # Linha 1: Cima + Baixo   (y=80)
-        # Linha 2: Esquerda + Direita (y=120)
-        bloco_w, bloco_h = 80, 30
-        gap = 10
-        grade_x = centro - bloco_w - gap // 2  # x da coluna esquerda
-        self.bloco_cima     = BlocoCima(    grade_x,              80)
-        self.bloco_baixo    = BlocoBaixo(   grade_x + bloco_w + gap, 80)
-        self.bloco_esquerda = BlocoEsquerda(grade_x,              80 + bloco_h + gap)
-        self.bloco_direita  = BlocoDireita( grade_x + bloco_w + gap, 80 + bloco_h + gap)
         topo = int(ALTURA_TELA * 0.03)
 
         self.area_como_jogar = pygame.Rect(
@@ -195,6 +194,7 @@ class Jogo:
         self.pos_x_inicial  = self.PAINEL_X + 10
         self.pos_y_lista    = 350   # abaixo da linha separadora do meio
         self.espacamento    = 90    # 80px bloco + 10px gap
+
         
         btn_w = self.area_acoes.width - 30
         btn_h = 44
@@ -247,9 +247,12 @@ class Jogo:
     def processar_eventos(self):
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
+                self.acao_final = "sair"
                 self.rodando = False
-                pygame.quit()
-                exit()
+
+            if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1 and self.estado_resultado:
+                self._processar_clique_resultado(evento.pos)
+                continue
 
             if evento.type == pygame.MOUSEWHEEL:
                 pos_mouse = pygame.mouse.get_pos()
@@ -260,7 +263,6 @@ class Jogo:
 
             if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
                 pos_mouse = evento.pos
-
 
                 if self.modo_loop:
                     # ── Modo Gravação de Loop ──
@@ -457,9 +459,8 @@ class Jogo:
                 break
 
     def _desenhar_linha_translucida(self, y):
-        """Desenha uma linha horizontal translúcida no painel direito."""
         surf = pygame.Surface((LARGURA_TELA - self.PAINEL_X, 2), pygame.SRCALPHA)
-        surf.fill((255, 255, 255, 60))  # branco com ~24% opacidade
+        surf.fill((255, 255, 255, 60))
         self.tela.blit(surf, (self.PAINEL_X, y))
 
     def _desenhar_destaque_sair(self, rect_botao):
@@ -664,12 +665,9 @@ class Jogo:
             pygame.draw.rect(self.tela,(120,140,200),area,3,border_radius=12)
         
 
-        # ── Matriz à esquerda, centralizada ─────────────────────────
+        # ── Matriz à esquerda ──
         cols = len(self.matriz[0])
         rows = len(self.matriz)
-        offset_x = (self.PAINEL_X - cols * 50) // 2
-        offset_y = (ALTURA_TELA  - rows * 50) // 2
-
 
         BORDA = 1
         total_cols = cols + 2 * BORDA
@@ -690,11 +688,18 @@ class Jogo:
         # 2. Desenha o interior (Células e Entidades)
         for i in range(rows):
             for j in range(cols):
-                x = offset_x + j * 50
-                y = offset_y + i * 50
-                if self.matriz[i][j] is not None:
-                    if isinstance(self.matriz[i][j], Personagem):
-                        self.matriz[i][j].desenhar(self.tela, x + 25, y + 25)
+                x = offset_x + (j + BORDA) * TAMANHO_CELULA
+                y = offset_y + (i + BORDA) * TAMANHO_CELULA
+
+                self.tela.blit(self.objeto_matriz.fundo, (x, y))
+
+                cor_da_linha = CORES["COR_LINHA"] 
+                pygame.draw.rect(self.tela, cor_da_linha, (x, y, TAMANHO_CELULA, TAMANHO_CELULA), 2)
+
+                celula = self.matriz[i][j]
+                if celula is not None:
+                    if isinstance(celula, Personagem):
+                        celula.desenhar(self.tela, x + TAMANHO_CELULA // 2, y + TAMANHO_CELULA // 2)
                     else:
                         celula.desenhar(self.tela, x, y)
       
@@ -770,7 +775,11 @@ class Jogo:
         self._desenhar_divisor_acoes(self.y_divisor_acoes)
         self._desenhar_texto_botao_acao(self.botao_sair.rect, "SAIR")
 
+        texto = self.fonte.render(f"Pontos: {self.pontuacao.pontos}", True, (255, 255, 255))
         self.tela.blit(texto, (10, 10))
+
+        if self.estado_resultado:
+            self._desenhar_tela_resultado()
 
         pygame.display.update()
 
@@ -902,3 +911,4 @@ class Jogo:
             self.atualizar()
             self.desenhar()
             self.relogio.tick(FPS)
+        return self.acao_final

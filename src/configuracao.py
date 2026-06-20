@@ -1,5 +1,5 @@
 # ── Tela ──────────────────────────────────────────────────────────────────────
-LARGURA_TELA = 800
+LARGURA_TELA = 1200
 ALTURA_TELA  = 600
 FPS          = 60
 TITULO       = "Perdido no Algoritmo"
@@ -25,7 +25,9 @@ CORES = {
     "CIANO_ESCURO": (0, 100, 100),
     "CINZA":         (137, 137, 137),
     "AZUL":          (0, 0, 200),
-    "AMARELO":       (200, 200, 0)
+    "AMARELO":       (200, 200, 0),
+    "AZUL_MARINHO": (67, 144, 176),
+    "AZUL_MARINHO_ESCURO": (35, 77, 88)
 }
 
 # ── Estados do Jogo ───────────────────────────────────────────────────────────

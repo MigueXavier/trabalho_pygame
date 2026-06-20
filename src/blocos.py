@@ -5,6 +5,7 @@ from src.configuracao import *
 
 
 class Bloco:
+
     def __init__(self, x, y, largura, altura, cor):
         self.rect = pygame.Rect(x, y, largura, altura)
         self.cor = cor
@@ -50,59 +51,64 @@ class Bloco:
 
 class BlocoDireita(Bloco):
     def __init__(self, x, y):
-        super().__init__(x, y, 80, 30, (0, 200, 0))
+        super().__init__(x, y, 80, 30, CORES["AZUL_MARINHO"])
         self.tipo = "direita"
         self.clicado = False
 
     def acao(self):
         if not self.clicado:
-         self.clicado = True
-         self.cor = (0, 100, 0)
+            self.clicado = True
+            self.cor = CORES["AZUL_MARINHO_ESCURO"]
 
 
 class BlocoEsquerda(Bloco):
     def __init__(self, x, y):
-        super().__init__(x, y, 80, 30, (200, 0, 0))
+        super().__init__(x, y, 80, 30, CORES["AZUL_MARINHO"])
         self.tipo = "esquerda"
         self.clicado = False
 
     def acao(self):
         if not self.clicado:
             self.clicado = True
-            self.cor = (100, 0, 0)
+            self.cor = CORES["AZUL_MARINHO_ESCURO"]
+
+
 class BlocoCima(Bloco):
     def __init__(self, x, y):
-        super().__init__(x, y, 80, 30, (200, 0, 200))
+        super().__init__(x, y, 80, 30, CORES["AZUL_MARINHO"])
         self.tipo = "cima"
         self.clicado = False
 
     def acao(self):
         if not self.clicado:
             self.clicado = True
-            self.cor = (100, 0, 100)
+            self.cor = CORES["AZUL_MARINHO_ESCURO"]
+
+
 class BlocoBaixo(Bloco):
     def __init__(self, x, y):
-        super().__init__(x, y, 80, 30, (0, 200, 200))
+        super().__init__(x, y, 80, 30, CORES["AZUL_MARINHO"])
         self.tipo = "baixo"
         self.clicado = False
 
     def acao(self):
         if not self.clicado:
             self.clicado = True
-            self.cor = (0, 100, 100)
+            self.cor = CORES["AZUL_MARINHO_ESCURO"]
 
 
+class BlocoRepetir(Bloco):
 
+    def __init__(self, x, y, n=2):
+        super().__init__(x, y, 80, 30, (220, 130, 0))
+        self.tipo = "repetir"
+        self.n = n
+        self.comandos = []
+        self.clicado = False
 
-
-
-
-
-
-
-
-
-
-
-
-
+    def desenhar(self, superficie):
+        pygame.draw.rect(superficie, self.cor, self.rect)
+        pygame.draw.rect(superficie, (160, 90, 0), self.rect, 2)
+        fonte = pygame.font.SysFont(None, 18)
+        texto = fonte.render(f"Rep x{self.n}", True, (255, 255, 255))
+        superficie.blit(texto, (self.rect.x + 5, self.rect.y + 8))
