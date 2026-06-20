@@ -8,9 +8,38 @@ class Bloco:
     def __init__(self, x, y, largura, altura, cor):
         self.rect = pygame.Rect(x, y, largura, altura)
         self.cor = cor
+     
+        pygame.font.init()
+        self.fonte = pygame.font.Font("assets/fontes/PressStart2P.ttf", 14)
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        novo = cls.__new__(cls)
+        memo[id(self)] = novo
+        for k, v in self.__dict__.items():
+            if isinstance(v, pygame.font.Font):
+                setattr(novo, k, pygame.font.Font("assets/fontes/PressStart2P.ttf", 14))
+            else:
+                setattr(novo, k, copy.deepcopy(v, memo))
+        return novo
 
     def desenhar(self, superficie):
         pygame.draw.rect(superficie, self.cor, self.rect)
+        pygame.draw.rect(superficie, (255, 255, 255), self.rect, 1)
+
+        if hasattr(self, 'tipo'):
+            setas = {
+                "direita": "→",
+                "esquerda": "←",
+                "cima": "↑",
+                "baixo": "↓"
+            }
+            
+            if self.tipo in setas:
+                texto_sinal = setas[self.tipo]
+                superficie_texto = self.fonte.render(texto_sinal, True, (255, 255, 255))
+                rect_texto = superficie_texto.get_rect(center=self.rect.center)
+                superficie.blit(superficie_texto, rect_texto)
 
     def checar_clique(self, pos_mouse):
         return self.rect.collidepoint(pos_mouse)

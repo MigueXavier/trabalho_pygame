@@ -1,8 +1,6 @@
 {
-  "nome": "Olá, Mundo!",
-  "descricao": "Chegue até a saída usando os blocos de comando.",
-  "limite_blocos": 5,
-  "posicao_inicial": [1, 1],
+  "fase": 1,
+  "blocos_disponiveis": ["cima", "baixo", "esquerda", "direita", "repetir"],
   "mapa": [
     [2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
     [2, 0, 0, 0, 0, 0, 0, 0, 0, 2],
