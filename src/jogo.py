@@ -241,6 +241,13 @@ class Jogo:
 
         self.instrucoes = []
 
+        self._drag_item = None
+        self._drag_offset = (0, 0)
+        self._drag_pos = (0, 0)
+        self._drag_indice_origem = None
+        self._drag_iniciou_em = (0, 0)
+        self._drag_ativo = False
+
         self.scroll_y = 0
         self.altura_conteudo = 0
 
@@ -257,50 +264,76 @@ class Jogo:
             if evento.type == pygame.MOUSEWHEEL:
                 pos_mouse = pygame.mouse.get_pos()
                 if self.area_sequencia.collidepoint(pos_mouse):
-                    self.scroll_y -= evento.y * 25   # 25px por "clique" da roda
+                    self.scroll_y -= evento.y * 25
                     self._limitar_scroll()
+                continue
+
+            if evento.type == pygame.MOUSEMOTION and self._drag_item is not None:
+                dx = abs(evento.pos[0] - self._drag_iniciou_em[0])
+                dy = abs(evento.pos[1] - self._drag_iniciou_em[1])
+                if dx > 5 or dy > 5:
+                    self._drag_ativo = True
+                self._drag_pos = evento.pos
+                continue
+
+            if evento.type == pygame.MOUSEBUTTONUP and evento.button == 1 and self._drag_item is not None:
+                pos_mouse = evento.pos
+                if self._drag_ativo:
+                    indice_destino = self._calcular_indice_insercao(pos_mouse)
+                    if indice_destino is not None and indice_destino != self._drag_indice_origem:
+                        item = self.lista_pecas.pop(self._drag_indice_origem)
+                        if indice_destino > self._drag_indice_origem:
+                            indice_destino -= 1
+                        self.lista_pecas.insert(indice_destino, item)
+                else:
+                    if self._remover_item_sequencia(pos_mouse):
+                        self.som_clique.play()
+                self._drag_item = None
+                self._drag_indice_origem = None
+                self._drag_ativo = False
                 continue
 
             if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
                 pos_mouse = evento.pos
 
                 if self.modo_loop:
-                    # ── Modo Gravação de Loop ──
                     clicou_bloco = False
                     for nome, bloco in self.blocos_paleta.items():
                         if bloco.checar_clique(pos_mouse):
                             self.loop_ativo.comandos.append(bloco.clonar_bloco())
                             clicou_bloco = True
                             break
-                    
                     if not clicou_bloco:
                         if self.botao_fechar_loop.checar_clique(pos_mouse):
                             self.som_clique.play()
                             self._fechar_loop()
                         elif self.botao_reset.checar_clique(pos_mouse):
                             self._reset_completo()
-                            
-                else:
-                    # ── Modo Normal ──
 
-                    # Clique dentro da caixa de sequência: tenta remover algo de lá primeiro
+                else:
                     if self.area_sequencia.collidepoint(pos_mouse):
-                        if self._remover_item_sequencia(pos_mouse):
-                            self.som_clique.play()
-                            continue
+                        for item in getattr(self, "_hitboxes_sequencia", []):
+                            if item["rect"].collidepoint(pos_mouse) and item["tipo"] in ("bloco_solto", "loop_inteiro"):
+                                self._drag_item = self.lista_pecas[item["indice_peca"]]
+                                self._drag_indice_origem = item["indice_peca"]
+                                self._drag_pos = pos_mouse
+                                self._drag_iniciou_em = pos_mouse
+                                self._drag_ativo = False
+                                break
+                        else:
+                            if self._remover_item_sequencia(pos_mouse):
+                                self.som_clique.play()
+                        continue
 
                     clicou_bloco = False
                     for nome, bloco in self.blocos_paleta.items():
                         if bloco.checar_clique(pos_mouse):
                             self.som_clique.play()
-
                             self.lista_pecas.append(bloco.clonar_bloco())
-
                             clicou_bloco = True
                             break
-                    
+
                     if not clicou_bloco:
-                        # Checa se o bloco repetir está disponível nesta fase antes de aceitar cliques
                         blocos_fase = self.dados.get("blocos_disponiveis", [])
                         if "repetir" in blocos_fase and self.bloco_repetir_paleta.checar_clique(pos_mouse):
                             self.som_clique.play()
@@ -370,6 +403,8 @@ class Jogo:
         self.personagem.indice_comando_atual = 0
         self.personagem.comandos_expandidos = []
         self.personagem._pontuacao = self.pontuacao
+        self._drag_iniciou_em = (0, 0)
+        self._drag_ativo = False
 
     def _processar_clique_resultado(self, pos_mouse):
         self.som_clique.play()
@@ -601,21 +636,20 @@ class Jogo:
                 continue
 
             if getattr(peca, "tipo", None) == "repetir":
-
-                altura = self._desenhar_bloco_repetir_na_sequencia(
-                    peca, x, y, largura_bloco, indice_peca,
-                    em_construcao=False,
-                    hitboxes=self._hitboxes_sequencia
-                )
-
-                
+                if indice_peca != self._drag_indice_origem or not self._drag_ativo:
+                    altura = self._desenhar_bloco_repetir_na_sequencia(
+                        peca, x, y, largura_bloco, indice_peca,
+                        em_construcao=False,
+                        hitboxes=self._hitboxes_sequencia
+                    )
+                else:
+                    altura = 70 + len(peca.comandos) * 45
                 y += altura + espacamento_y
 
             else:
-
                 peca.rect.topleft = (x, y)
-
-                peca.desenhar(self.tela)
+                if indice_peca != self._drag_indice_origem or not self._drag_ativo:
+                    peca.desenhar(self.tela)
 
                 # Registra o bloco solto (fora de qualquer loop)
                 self._hitboxes_sequencia.append({
@@ -634,11 +668,10 @@ class Jogo:
                 em_construcao=True,
                 hitboxes=None
             )
+            y += 70 + len(self.loop_ativo.comandos) * 45 + espacamento_y
 
-       
         self.tela.set_clip(clip_anterior)
 
-      
         self.altura_conteudo = (y + self.scroll_y) - inicio_y
 
        
@@ -651,8 +684,6 @@ class Jogo:
     def desenhar(self):
         self.tela.fill(CORES["FUNDO"])
         pygame.draw.rect(self.tela,CORES["FUNDO"],(self.PAINEL_X,0,LARGURA_TELA-self.PAINEL_X,ALTURA_TELA))
-        
-        
         for area in [
             self.area_como_jogar,
             self.area_blocos,
@@ -733,20 +764,9 @@ class Jogo:
                     self.botao_fechar_loop.rect.y + 8,
                 ))
 
-        pygame.draw.rect(
-            self.tela,
-            (25,30,55),
-            self.area_sequencia,
-            border_radius=12
-        )
+        pygame.draw.rect(self.tela,(25,30,55),self.area_sequencia,border_radius=12)
 
-        pygame.draw.rect(
-            self.tela,
-            (120,140,200),
-            self.area_sequencia,
-            3,
-            border_radius=12
-        )
+        pygame.draw.rect(self.tela,(120,140,200),self.area_sequencia,3,border_radius=12)
     
         titulo_como_jogar = self._fonte_titulo_painel.render("COMO JOGAR", True, (255,255,255))
         rect_titulo_1 = titulo_como_jogar.get_rect(centerx=self.area_como_jogar.centerx, y=self.area_como_jogar.y + 12)
@@ -780,6 +800,15 @@ class Jogo:
 
         if self.estado_resultado:
             self._desenhar_tela_resultado()
+
+        if self._drag_item is not None and self._drag_ativo:
+            surf = pygame.Surface((self._drag_item.rect.width, self._drag_item.rect.height), pygame.SRCALPHA)
+            self._drag_item.rect.topleft = (0, 0)
+            self._drag_item.desenhar(surf)
+            surf.set_alpha(160)
+            x_drag = self._drag_pos[0] - self._drag_item.rect.width // 2
+            y_drag = self._drag_pos[1] - self._drag_item.rect.height // 2
+            self.tela.blit(surf, (x_drag, y_drag))
 
         pygame.display.update()
 
@@ -904,6 +933,17 @@ class Jogo:
             texto = self._fonte_como_jogar.render(linha, True, (255, 255, 255))
             self.tela.blit(texto, (x_texto, y))
             y += 15
+
+    def _calcular_indice_insercao(self, pos_mouse):
+        inicio_y = self.area_sequencia.y + 60
+        altura_bloco = 45
+        espacamento_y = 15
+        y = inicio_y - self.scroll_y
+        for i in range(len(self.lista_pecas) + 1):
+            if pos_mouse[1] < y + (altura_bloco + espacamento_y) // 2:
+                return i
+            y += altura_bloco + espacamento_y
+        return len(self.lista_pecas)
 
     def rodar(self):
         while self.rodando:
