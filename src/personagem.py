@@ -38,8 +38,8 @@ class Personagem:
         self.executando_comandos = False
         self.indice_comando_atual = 0
         self.direcao_atual = None
-        self.tempo_ultimo_passo = 0      # ← novo
-        self.delay_entre_passos = 500    # ← meio segundo entre cada passo (ms)
+        self.tempo_ultimo_passo = 0
+        self.delay_entre_passos = 500    # meio segundo entre cada passo (ms)
         self.comandos_expandidos = []    # flat list built at deploy time
         self.vidas = VIDAS_MAXIMAS
         self.chegou_no_objetivo = False
@@ -71,7 +71,6 @@ class Personagem:
         if not self.executando_comandos:
             return
 
-        # Só executa o próximo passo se já passou o delay
         agora = pygame.time.get_ticks()
         if agora - self.tempo_ultimo_passo < self.delay_entre_passos:
             return

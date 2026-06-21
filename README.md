@@ -48,7 +48,9 @@
 - [Elementos do Jogo](#-elementos-do-jogo)
 - [Controles](#️-controles)
 - [Organização do Código](#️-organização-do-código)
+- [Como Rodar os Testes](#-como-rodar-os-testes)
 - [Recursos Externos e Bibliografia](#️-recursos-externos-e-bibliografia)
+- [Proposta do Trabalho](#-proposta-do-trabalho)
 
 ---
 
@@ -205,8 +207,13 @@ trabalho_pygame/
 ├── main.py                →  Ponto de entrada; controla o loop Menu ⇄ Jogo
 ├── main.spec              →  Configuração do PyInstaller para geração do executável
 ├── dados.json             →  Persistência do progresso e recordes salvos
-├── requirements.txt       →  Dependências do projeto (ex: pygame)
+├── requirements.txt       →  Dependências para rodar o jogo (ex: pygame)
+├── requirements-dev.txt   →  Dependências extras para desenvolvimento/testes (ex: pytest)
+├── pytest.ini             →  Configuração da suíte de testes automatizados
 ├── .gitignore             →  Arquivos e pastas ignorados pelo Git
+│
+├── docs/
+│   └── proposta.md        →  Proposta detalhada do trabalho prático
 │
 ├── src/
 │   ├── jogo.py            →  Loop principal, montagem da sequência e execução
@@ -234,8 +241,33 @@ trabalho_pygame/
 │   └── sprites/           →  Spritesheet e elementos visuais
 │
 └── tests/
-    └── teste_visual.py    →  Script de verificação visual dos componentes gráficos
+    ├── conftest.py         →  Configuração do Pygame em modo headless para os testes
+    ├── test_dados.py       →  Testes de persistência (save/load de progresso)
+    ├── test_pontuacao.py   →  Testes do sistema de pontuação
+    ├── test_blocos.py      →  Testes dos blocos de comando (incl. bloco de repetição)
+    ├── test_matriz.py      →  Testes da construção do labirinto a partir do JSON
+    ├── test_personagem.py  →  Testes de movimentação, colisão, coleta e vidas
+    ├── test_fases.py       →  Testes de integridade dos arquivos fases/*.json
+    └── teste_visual.py     →  Script de verificação visual manual dos componentes gráficos
 ```
+
+---
+
+## 🧪 Como Rodar os Testes
+
+O projeto possui uma suíte de testes automatizados (Pytest) cobrindo as principais regras de negócio: persistência de progresso, pontuação, blocos de comando, construção do labirinto, movimentação/colisão/coleta do personagem e integridade dos arquivos de fase.
+
+```bash
+# 1. Com o ambiente virtual já ativado, instale as dependências de teste
+pip install -r requirements-dev.txt
+
+# 2. Rode a suíte a partir da raiz do projeto
+pytest
+```
+
+Os testes rodam o Pygame em modo *headless* (sem abrir janela), então podem ser executados normalmente em terminal ou em CI.
+
+> Já o arquivo `tests/teste_visual.py` **não** é um teste automatizado: é um script auxiliar que abre uma janela do jogo para inspeção visual manual dos componentes gráficos durante o desenvolvimento (`python tests/teste_visual.py`, a partir da raiz do projeto).
 
 ---
 
@@ -256,6 +288,12 @@ Todos os recursos de terceiros respeitam suas respectivas licenças de uso gratu
 ### ✍️ Tipografia
 
 - **Fonte Principal:** [Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P) — distribuída gratuitamente sob licença open-source pela Google Fonts
+
+---
+
+## 📄 Proposta do Trabalho
+
+A proposta detalhada do trabalho prático — tema, justificativa, objetivos, conceitos da disciplina aplicados e cronograma de entregas — está documentada em [`docs/proposta.md`](docs/proposta.md).
 
 ---
 

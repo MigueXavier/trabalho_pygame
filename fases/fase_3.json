@@ -1,6 +1,6 @@
 {
   "fase": 3,
-  "blocos_disponiveis": ["cima", "baixo", "esquerda", "direita","direita","cima", "repetir"],
+  "blocos_disponiveis": ["cima", "baixo", "esquerda", "direita", "repetir"],
   "mapa": [
     [1, 0, 0, 3, 2],
     [0, 2, 0, 0, 2],

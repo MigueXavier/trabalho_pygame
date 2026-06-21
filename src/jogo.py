@@ -51,7 +51,6 @@ class Jogo:
 
     def inicializar_elementos(self):
     
-        # Localiza o personagem dentro da matriz gerada
         self.personagem = None
         for linha in self.matriz:
             for celula in linha:
@@ -66,11 +65,9 @@ class Jogo:
         self.personagem._pontuacao = self.pontuacao
         self.fonte = pygame.font.Font(None, 36)
 
-        # Divisão da tela
-        self.PAINEL_X = LARGURA_TELA // 2  # x=400
+        self.PAINEL_X = LARGURA_TELA // 2
 
-        # Centro do painel direito
-        centro = self.PAINEL_X + (LARGURA_TELA - self.PAINEL_X) // 2  # x=600
+        centro = self.PAINEL_X + (LARGURA_TELA - self.PAINEL_X) // 2
         painel_largura = LARGURA_TELA - self.PAINEL_X
         self.PAINEL_LARGURA = painel_largura
 
@@ -123,22 +120,17 @@ class Jogo:
 
         self.blocos_paleta = {}
 
-        # Recupera a lista do JSON através do objeto matriz
         blocos_fase = self.dados.get("blocos_disponiveis", ["cima", "baixo", "esquerda", "direita"])
 
         tem_repetir = "repetir" in blocos_fase
 
-        # Conta quantos itens direcionais existem (ignorando "repetir", que é tratado à parte)
         nomes_direcionais = [nome for nome in blocos_fase if nome in classes_blocos]
         total_itens = len(nomes_direcionais) + (1 if tem_repetir else 0)
 
-        # Divide a largura da caixa de blocos em "total_itens" espaços iguais
-        # Divide a largura ÚTIL da caixa (com margem nas duas pontas) em "total_itens" espaços iguais
         margem_lateral = 20
         largura_disponivel = self.area_blocos.width - margem_lateral * 2
         largura_slot = largura_disponivel // max(total_itens, 1)
 
-        # Centraliza cada bloco dentro do seu próprio "slot", já considerando a margem lateral
         x_inicial = self.area_blocos.x + margem_lateral + (largura_slot - bloco_w) // 2
 
         idx_item = 0
@@ -173,8 +165,7 @@ class Jogo:
 
         self.bloco_repetir_paleta = BlocoRepetir(pos_loop_x, y_repetir, n=self.n_repeticoes)
 
-        # Largura total ocupada pelos dois botões + espaço do número no meio
-        largura_controles = 22 + 25 + 22   # botão-menos + espaço-do-número + botão-mais
+        largura_controles = 22 + 25 + 22
         centro_bloco_repetir = pos_loop_x + bloco_w // 2
         x_controles = centro_bloco_repetir - largura_controles // 2
 
@@ -185,18 +176,15 @@ class Jogo:
         fechar_loop_y = self.area_blocos.bottom - fechar_loop_altura - 8
         self.botao_fechar_loop = Botao(centro - 75, fechar_loop_y, 150, fechar_loop_altura, (0, 160, 0))
 
-        # Font cached for UI labels
-        
         self._fonte_ui = pygame.font.SysFont(None, 20)
         self._fonte_titulo_painel = pygame.font.SysFont(None, 24, bold=True)
         self._fonte_setas_texto = pygame.font.Font("assets/fontes/PressStart2P.ttf", 10)
         self._fonte_como_jogar = pygame.font.SysFont(None, 17)
 
-        # ── Seção 2: Fila de comandos ────────────────────────────────
         self.lista_pecas    = []
         self.pos_x_inicial  = self.PAINEL_X + 10
-        self.pos_y_lista    = 350   # abaixo da linha separadora do meio
-        self.espacamento    = 90    # 80px bloco + 10px gap
+        self.pos_y_lista    = 350
+        self.espacamento    = 90
 
         
         btn_w = self.area_acoes.width - 30
@@ -226,7 +214,6 @@ class Jogo:
     
         self._fonte_botoes_acoes = pygame.font.Font("assets/fontes/PressStart2P.ttf", 12)
 
-        # Ícones dos botões de ação (carregados como imagem, em vez de desenhados manualmente)
         tamanho_icone = 16
         self._icone_play = pygame.transform.scale(
             pygame.image.load("assets/sprites/icones/play.png").convert_alpha(),
@@ -268,7 +255,7 @@ class Jogo:
             if evento.type == pygame.MOUSEWHEEL:
                 pos_mouse = pygame.mouse.get_pos()
                 if self.area_sequencia.collidepoint(pos_mouse):
-                    self.scroll_y -= evento.y * 25   # 25px por "clique" da roda
+                    self.scroll_y -= evento.y * 25
                     self._limitar_scroll()
                 continue
 
@@ -314,7 +301,6 @@ class Jogo:
             if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
                 pos_mouse = evento.pos
 
-                # ── Scrollbar da sequência de comandos ──
                 geometria = self._geometria_scrollbar_sequencia()
                 if geometria is not None:
                     trilho, cursor, _ = geometria
@@ -332,7 +318,6 @@ class Jogo:
                         continue
 
                 if self.modo_loop:
-                    # ── Modo Gravação de Loop ──
                     clicou_bloco = False
                     for nome, bloco in self.blocos_paleta.items():
                         if bloco.checar_clique(pos_mouse):
@@ -348,9 +333,7 @@ class Jogo:
                             self._reset_completo()
                             
                 else:
-                    # ── Modo Normal ──
 
-                    # Clique dentro da caixa de sequência: tenta iniciar um arrasto primeiro
                     if self.area_sequencia.collidepoint(pos_mouse):
                         for item in getattr(self, "_hitboxes_sequencia", []):
                             if item["rect"].collidepoint(pos_mouse) and item["tipo"] in ("bloco_solto", "loop_inteiro"):
@@ -376,7 +359,6 @@ class Jogo:
                             break
                     
                     if not clicou_bloco:
-                        # Checa se o bloco repetir está disponível nesta fase antes de aceitar cliques
                         blocos_fase = self.dados.get("blocos_disponiveis", [])
                         if "repetir" in blocos_fase and self.bloco_repetir_paleta.checar_clique(pos_mouse):
                             self.som_clique.play()
@@ -500,14 +482,12 @@ class Jogo:
         self.bloco_repetir_paleta.cor = (220, 130, 0)
 
     def _reset_completo(self):
-        # Limpa a sequência de comandos e reabilita todos os blocos da paleta
         self.lista_pecas.clear()
         for bloco in self.blocos_paleta.values():
             if bloco:
                 bloco.clicado = False
                 bloco.cor = CORES["AZUL_MARINHO"]
 
-        # O restante do reset do bloco de repetir e pontuação continua igual:
         self.modo_loop = False
         self.loop_ativo = None
         self.bloco_repetir_paleta.clicado = False
@@ -521,14 +501,11 @@ class Jogo:
         self._drag_ativo = False
 
     def _remover_item_sequencia(self, pos_mouse):
-        # Percorre os itens clicáveis na ordem em que foram desenhados
-        # (blocos internos de um loop vêm antes da caixa do loop, então têm prioridade)
         for item in getattr(self, "_hitboxes_sequencia", []):
             if not item["rect"].collidepoint(pos_mouse):
                 continue
 
             if item["tipo"] == "comando_no_loop":
-                # Remove só aquele bloco específico de dentro do loop
                 peca_pai = item["peca_pai"]
                 indice = item["indice_no_loop"]
                 if 0 <= indice < len(peca_pai.comandos):
@@ -537,7 +514,6 @@ class Jogo:
                 return True
 
             if item["tipo"] == "loop_inteiro":
-                # Remove o loop inteiro, reabilitando todos os blocos que estavam dentro dele
                 indice = item["indice_peca"]
                 peca = self.lista_pecas[indice]
                 for bloco_interno in peca.comandos:
@@ -546,7 +522,6 @@ class Jogo:
                 return True
 
             if item["tipo"] == "bloco_solto":
-                # Remove o bloco solto da sequência principal
                 indice = item["indice_peca"]
                 bloco_removido = self.lista_pecas.pop(indice)
                 self._reabilitar_bloco_na_paleta(bloco_removido)
@@ -555,9 +530,6 @@ class Jogo:
         return False
 
     def _calcular_indice_insercao(self, pos_mouse):
-        # Usa as hitboxes reais do último desenho (já levam em conta a altura
-        # variável dos blocos de loop) para decidir em que posição da lista
-        # o item arrastado deve ser solto.
         itens_topo = sorted(
             (
                 item for item in getattr(self, "_hitboxes_sequencia", [])
@@ -573,7 +545,6 @@ class Jogo:
         return len(self.lista_pecas)
 
     def _reabilitar_bloco_na_paleta(self, bloco_removido):
-        # Ao remover um bloco da sequência, o bloco ORIGINAL correspondente na paleta
         tipo_removido = getattr(bloco_removido, "tipo", None)
         if tipo_removido is None:
             return
@@ -615,7 +586,6 @@ class Jogo:
         self.tela.blit(label, label_rect)
 
     def _desenhar_divisor_acoes(self, y):
-        # Linha pontilhada horizontal, separando grupos de botões na caixa de ações
         x_inicio = self.area_acoes.x + 15
         x_fim = self.area_acoes.right - 15
         x = x_inicio
@@ -632,8 +602,6 @@ class Jogo:
             self.scroll_y = maximo
 
     def _geometria_scrollbar_sequencia(self):
-        """Calcula o trilho e o cursor (thumb) da scrollbar da sequência de comandos.
-        Retorna None se o conteúdo couber inteiro na área visível (scrollbar desnecessária)."""
         altura_visivel = self.area_sequencia.height - 70
 
         if self.altura_conteudo <= altura_visivel:
@@ -670,8 +638,6 @@ class Jogo:
         pygame.draw.rect(self.tela, cor_cursor, cursor, border_radius=4)
 
     def _desenhar_bloco_repetir_na_sequencia(self, peca, x, y, largura_bloco, indice_peca, em_construcao, hitboxes):
-        # Desenha uma caixa de loop (laranja) com seus comandos dentro.
-        # Se em_construcao=True, usa cores translúcidas (loop ainda sendo montado).
         altura = 70 + len(peca.comandos) * 45
 
         caixa = pygame.Rect(x, y, largura_bloco, altura)
@@ -703,7 +669,6 @@ class Jogo:
             cmd.rect.y = y_loop
 
             if em_construcao:
-                # Desenha o bloco numa superfície separada para poder aplicar transparência
                 bloco_surf = pygame.Surface(cmd.rect.size, pygame.SRCALPHA)
                 rect_original = cmd.rect.copy()
                 cmd.rect.topleft = (0, 0)
@@ -742,7 +707,6 @@ class Jogo:
         espacamento_y = 15
 
         x = inicio_x
-        # Desloca o início pelo valor do scroll (sobe o conteúdo conforme rola pra baixo)
         y = inicio_y - self.scroll_y
 
        
@@ -783,7 +747,6 @@ class Jogo:
                 if indice_peca != self._drag_indice_origem or not self._drag_ativo:
                     peca.desenhar(self.tela)
 
-                # Registra o bloco solto (fora de qualquer loop)
                 self._hitboxes_sequencia.append({
                     "rect": peca.rect.copy(),
                     "tipo": "bloco_solto",
@@ -832,7 +795,6 @@ class Jogo:
             pygame.draw.rect(self.tela,(120,140,200),area,3,border_radius=12)
         
 
-        # ── Matriz à esquerda ──
         cols = len(self.matriz[0])
         rows = len(self.matriz)
 
@@ -843,7 +805,6 @@ class Jogo:
         offset_x = (self.PAINEL_X - total_cols * TAMANHO_CELULA) // 2
         offset_y = (ALTURA_TELA - total_rows * TAMANHO_CELULA) // 2
 
-        # 1. Desenha as paredes externas
         for i in range(total_rows):
             for j in range(total_cols):
                 x = offset_x + j * TAMANHO_CELULA
@@ -852,7 +813,6 @@ class Jogo:
                 if sprite_p:
                     self.tela.blit(sprite_p, (x, y))
 
-        # 2. Desenha o interior (Células e Entidades)
         for i in range(rows):
             for j in range(cols):
                 x = offset_x + (j + BORDA) * TAMANHO_CELULA
@@ -871,11 +831,9 @@ class Jogo:
                         celula.desenhar(self.tela, x, y)
       
        
-        # ── Painel direito: Renderização Dinâmica de Blocos ──
         for bloco in self.blocos_paleta.values():
             bloco.desenhar(self.tela)
 
-        # Interface do Bloco de Repetição (Apenas se disponível no JSON)
         blocos_fase = self.dados.get("blocos_disponiveis", [])
         if self.bloco_repetir_paleta:
             self.botao_menos.desenhar(self.tela)
@@ -1007,7 +965,6 @@ class Jogo:
             self.tela.blit(texto_surface, texto_rect)
 
     def _quebrar_texto_em_linhas(self, texto, fonte, largura_maxima):
-        # Quebra um texto corrido em várias linhas, respeitando a largura máxima disponível.
         palavras = texto.split(" ")
         linhas = []
         linha_atual = ""
@@ -1037,7 +994,6 @@ class Jogo:
         x_texto = self.area_como_jogar.x + 15
         y = self.area_como_jogar.y + 34
 
-        # ── Parágrafo corrido, com quebra de linha automática ──
         linhas_paragrafo = self._quebrar_texto_em_linhas(paragrafo, self._fonte_como_jogar, largura_texto)
 
         for linha in linhas_paragrafo:

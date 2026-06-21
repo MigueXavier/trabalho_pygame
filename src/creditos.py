@@ -70,38 +70,34 @@ class Creditos:
     def _desenhar_conteudo(self):
         cx = LARGURA_TELA // 2
 
-        # ── Título ────────────────────────────────────────────────────────────
+        # Título
         self._texto_pixel(self._fonte_titulo, "CREDITOS",
                           (180, 210, 255), (20, 25, 60), (cx, 65))
 
-        # Linha decorativa de pontos
         for x in range(cx - 220, cx + 220, 4):
             pygame.draw.rect(self.tela, (60, 80, 140), (x, 100, 2, 2))
 
-        # ── Seção: Desenvolvido por ───────────────────────────────────────────
+        # Seção: Desenvolvido por
         self._texto_pixel(self._fonte_secao, "DESENVOLVIDO POR",
                           (130, 160, 230), (10, 15, 40), (cx, 125))
 
         for i, nome in enumerate(INTEGRANTES):
             y = 155 + i * 30
 
-            # Estrelinha decorativa
             if self._estrela:
                 er = self._estrela.get_rect(center=(cx - 175, y))
                 self.tela.blit(self._estrela, er)
 
-            # Sombra + texto do nome
             surf_s = self._fonte_nome.render(nome, True, (20, 25, 60))
             surf_t = self._fonte_nome.render(nome, True, (220, 225, 255))
             self.tela.blit(surf_s, surf_s.get_rect(midleft=(cx - 150, y + 2)))
             self.tela.blit(surf_t, surf_t.get_rect(midleft=(cx - 150, y)))
 
-        # Linha separadora
         sep_y = 320
         for x in range(cx - 220, cx + 220, 4):
             pygame.draw.rect(self.tela, (60, 80, 140), (x, sep_y, 2, 2))
 
-        # ── Infos extras ──────────────────────────────────────────────────────
+        # Infos extras
         infos = [
             ("Linguagem:", "Python 3.10+ / Pygame"),
             ("Ano:",       "2026"),
@@ -113,7 +109,6 @@ class Creditos:
             self.tela.blit(sc, sc.get_rect(midright=(cx - 4, y)))
             self.tela.blit(sv, sv.get_rect(midleft=(cx + 4, y)))
 
-        # ── Aviso do link ─────────────────────────────────────────────────────
         aviso = self._fonte_link.render("Fontes e referencias no Drive:", True, (140, 160, 210))
         self.tela.blit(aviso, aviso.get_rect(center=(cx, sep_y + 74)))
 

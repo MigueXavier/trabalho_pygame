@@ -9,19 +9,18 @@ from src.objetivo import Objetivo
 
 class Matriz:
     def __init__(self, dados_fase=None):
-        # 1. Carregamento Gráfico Existente
         self.spritesheet = pygame.image.load("assets/sprites/sprits-jogo-python/dungeon_sheet.png").convert_alpha()
         self.TAM_SPRITE_BASE = 16 
 
         coordenadas_paredes = {
-            "canto_topo_esq":  (0, 0, 16, 16),    # Primeira célula do topo esquerdo
-            "topo":            (16, 0, 16, 16),   # Bloco do meio do topo
-            "canto_topo_dir":  (32, 0, 16, 16),   # Terceira célula do topo (borda direita)
-            "esquerda":        (0, 16, 16, 16),   # Borda esquerda pura
-            "direita":         (32, 16, 16, 16),  # Borda direita pura
-            "canto_baixo_esq": (0, 32, 16, 16),   # Quina inferior esquerda
-            "baixo":           (16, 32, 16, 16),  # Bloco do meio de baixo
-            "canto_baixo_dir": (32, 32, 16, 16),  # Quina inferior direita
+            "canto_topo_esq":  (0, 0, 16, 16),
+            "topo":            (16, 0, 16, 16),
+            "canto_topo_dir":  (32, 0, 16, 16),
+            "esquerda":        (0, 16, 16, 16),
+            "direita":         (32, 16, 16, 16),
+            "canto_baixo_esq": (0, 32, 16, 16),
+            "baixo":           (16, 32, 16, 16),
+            "canto_baixo_dir": (32, 32, 16, 16),
         }
         
         self.sprites_parede = {}
@@ -32,10 +31,8 @@ class Matriz:
         self.fundo = pygame.image.load("assets/sprites/sprits-jogo-python/fundo_16px.png").convert()
         self.fundo = pygame.transform.scale(self.fundo, (TAMANHO_CELULA, TAMANHO_CELULA))
 
-        # 2. Atributo principal esperado pelo seu jogo.py
         self.matriz = []
 
-        # Constrói o mapa dinamicamente se os dados do JSON existirem
         if dados_fase and "mapa" in dados_fase:
             self.construir_mapa(dados_fase["mapa"])
         else:
@@ -53,7 +50,6 @@ class Matriz:
                     nova_linha.append(Personagem(0, 0))
                     
                 elif celula == 2:
-                    # Instancia uma barreira passando os argumentos que você já usa
                     nova_linha.append(Barreira(50, (255, 0, 0)))
                     
                 elif celula == 3:
