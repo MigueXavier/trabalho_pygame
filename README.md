@@ -75,7 +75,7 @@ Conforme as fases avançam, torna-se necessário utilizar o bloco de repetição
 ```bash
 # 1. Clone o repositório
 git clone https://github.com/MigueXavier/trabalho_pygame.git
-cd python-game
+cd trabalho_pygame
 
 # 2. Crie e ative um ambiente virtual
 python3 -m venv .venv
@@ -216,9 +216,8 @@ trabalho_pygame/
 │   └── proposta.md        →  Proposta detalhada do trabalho prático
 │
 ├── src/
-│   ├── jogo.py            →  Loop principal, montagem da sequência e execução
+│   ├── jogo.py            →  Loop principal, montagem/execução da sequência e telas de Vitória/Game Over
 │   ├── menu.py            →  Menu inicial (Novo Jogo / Continuar / Créditos / Sair)
-│   ├── menus_resultado.py →  Telas de Game Over e Vitória de cada fase
 │   ├── configuracao.py    →  Constantes globais (tela, cores, layout, fases)
 │   ├── personagem.py      →  Movimentação do jogador e efeitos sonoros
 │   ├── blocos.py          →  Blocos de comando (direção e repetição)
@@ -277,7 +276,7 @@ Todos os recursos de terceiros respeitam suas respectivas licenças de uso gratu
 
 ### 🎨 Elementos Visuais e Sprites
 
-- **Sprites do Labirinto e Personagens:** Obtidos em bancos de assets públicos gratuitos ([Itch.io](https://itch.io) / [Kenney.nl](https://kenney.nl))
+- **Sprites do Labirinto e Personagens:** [A Blocky Dungeon](https://opengameart.org/content/a-blocky-dungeon) — OpenGameArt, licença CC0 (domínio público)
 - **Interface e Botões:** Customizados e renderizados via Pygame com formas geométricas e sprites nativos do projeto
 
 ### 🎵 Áudio e Efeitos Sonoros
