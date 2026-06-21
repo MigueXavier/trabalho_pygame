@@ -14,14 +14,14 @@ def carregar_fonte(tamanho):
 
 
 class BotaoMenu:
-    def __init__(self, x, y, largura, altura, texto, desabilitado=False, tile=None):
+    def __init__(self, x, y, largura, altura, texto, desabilitado=False, tile=None, tamanho_fonte=14):
         self.som_clique = pygame.mixer.Sound("assets/sons/clique_botoes.mp3")
         self.som_clique.set_volume(0.08)
         self.rect = pygame.Rect(x, y, largura, altura)
         self.texto = texto
         self.desabilitado = desabilitado
         self._tile = tile
-        self._fonte = carregar_fonte(14)
+        self._fonte = carregar_fonte(tamanho_fonte)
 
     def _desenhar_tile_fundo(self, superficie):
         if not self._tile:
@@ -192,7 +192,7 @@ class Menu:
                     if botao.checar_clique(evento.pos):
                         botao.som_clique.play()
                         self.acao = botao._acao
-                        if self.acao in ("novo_jogo", "continuar", "sair"):
+                        if self.acao in ("novo_jogo", "continuar", "sair", "creditos"):
                             self.rodando = False
 
     def desenhar(self):

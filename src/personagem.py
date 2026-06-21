@@ -1,6 +1,6 @@
 import pygame
 import random
-from src.configuracao import TAMANHO_CELULA, CORES
+from src.configuracao import TAMANHO_CELULA, CORES, VIDAS_MAXIMAS
 from src.item import Item
 from src.objetivo import Objetivo
 
@@ -41,7 +41,7 @@ class Personagem:
         self.tempo_ultimo_passo = 0      # ← novo
         self.delay_entre_passos = 500    # ← meio segundo entre cada passo (ms)
         self.comandos_expandidos = []    # flat list built at deploy time
-        self.vidas = 3
+        self.vidas = VIDAS_MAXIMAS
         self.chegou_no_objetivo = False
 
     def desenhar(self, superficie, x, y):

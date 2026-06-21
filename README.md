@@ -1,7 +1,6 @@
 <div align="center">
 <div align="center">
 
-```
 ██████╗ ███████╗██████╗ ██████╗ ██╗██████╗  ██████╗
 ██╔══██╗██╔════╝██╔══██╗██╔══██╗██║██╔══██╗██╔═══██╗
 ██████╔╝█████╗  ██████╔╝██║  ██║██║██║  ██║██║   ██║
@@ -15,7 +14,7 @@
 ██║╚██╗██║██║   ██║    ██╔══██║██║     ██║   ██║██║   ██║██╔══██╗██║   ██║   ██║╚██╔╝██║██║   ██║
 ██║ ╚████║╚██████╔╝    ██║  ██║███████╗╚██████╔╝╚██████╔╝██║  ██║██║   ██║   ██║ ╚═╝ ██║╚██████╔╝
 ╚═╝  ╚═══╝ ╚═════╝     ╚═╝  ╚═╝╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝   ╚═╝   ╚═╝     ╚═╝ ╚═════╝
-```
+
 
 </div>
 
@@ -54,8 +53,7 @@
 - [Elementos do Jogo](#-elementos-do-jogo)
 - [Controles](#️-controles)
 - [Organização do Código](#️-organização-do-código)
-- [Recursos Externos](#️-recursos-externos)
-- [Melhorias Previstas](#-melhorias-previstas)
+- [Recursos Externos e Bibliografia](#️-recursos-externos-e-bibliografia)
 
 ---
 
@@ -73,7 +71,6 @@ Conforme as fases avançam, torna-se necessário utilizar o bloco de repetição
 
 <div align="center">
 
-```
 ┌──────────────────────────────────────────────────────────┐
 │                                                          │
 │  1. Analise o labirinto e os objetivos da fase           │
@@ -87,7 +84,7 @@ Conforme as fases avançam, torna-se necessário utilizar o bloco de repetição
 │  5. Se não conseguir, perde uma vida e tenta de novo     │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
-```
+
 
 </div>
 
@@ -96,7 +93,6 @@ Conforme as fases avançam, torna-se necessário utilizar o bloco de repetição
 ## Objetivos
 
 - Chegar até o final do labirinto
-- Coletar itens
 - Coletar os itens no **menor número de comandos possível**
 - Evitar obstáculos
 
@@ -143,13 +139,12 @@ Itens coletáveis aumentam a pontuação quando coletados.
 
 ### Pontuação, Vidas e Progresso
 
-```
 ♥ ♥ ♥  →  3 vidas iniciais
 
 ⭐ Coletar um item     → +10 pontos
 💀 Perder todas vidas  → reinicia a fase
 🚪 Concluir as 3 fases → vitória final
-```
+
 
 ---
 
@@ -158,13 +153,13 @@ Itens coletáveis aumentam a pontuação quando coletados.
 ### Pré-requisitos
 
 - **Python 3.10+**
-- **pip** e **venv** (no Ubuntu/Debian: `sudo apt install python3-pip python3-venv`)
+
 
 ### Passo a passo
 
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/<seu-usuario>/python-game.git
+git clone https://github.com/MigueXavier/trabalho_pygame.git
 cd python-game
 
 # 2. Crie e ative um ambiente virtual
@@ -177,15 +172,7 @@ pip install -r requirements.txt
 
 # 4. Rode o jogo
 python main.py
-```
-
----
-
-## Controles
-
-<div align="center">
-
-```
+Controles
 ╔══════════════════════════════════════════════════════════╗
 ║                MANUAL DE BLOCOS E BOTÕES                 ║
 ╠══════════════════════════════════════════════════════════╣
@@ -212,66 +199,53 @@ python main.py
 ║  [ SAIR     ] → Salva o progresso e volta ao menu          ║
 ║                                                          ║
 ╚══════════════════════════════════════════════════════════╝
-```
-
-</div>
-
----
-
-## Organização do Código
-
-```
-main.py              →  ponto de entrada; controla o loop Menu ⇄ Jogo
+Organização do Código
+main.py                →  Ponto de entrada; controla o loop Menu ⇄ Jogo
+main.spec              →  Arquivo de configuração do PyInstaller para geração do executável
+dados.json             →  Arquivo de persistência que armazena o progresso e recordes salvos
+requirements.txt       →  Lista de dependências do projeto (ex: pygame)
+.gitignore             →  Instruções de arquivos e pastas ignorados pelo Git
 
 src/
-├── jogo.py          →  loop principal, montagem da sequência, execução e telas de resultado
-├── menu.py          →  menu inicial (Novo Jogo / Continuar / Créditos / Sair)
-├── configuracao.py  →  constantes globais (tela, cores, layout, fases)
-├── personagem.py     →  movimentação do jogador e efeitos sonoros
-├── blocos.py         →  blocos de comando (direção e repetição)
-├── comandos.py        →  botão genérico reutilizado pela interface
-├── matriz.py          →  construção do labirinto a partir do JSON da fase
-├── barreira.py         →  obstáculos
-├── item.py             →  itens coletáveis
-├── objetivo.py          →  ponto de chegada da fase
-├── pontuacao.py          →  contagem de pontos
-└── dados.py              →  leitura/escrita do save (recorde e fase atual)
+├── jogo.py            →  Loop principal, montagem da sequência, execução e telas de resultado
+├── menu.py            →  Menu inicial (Novo Jogo / Continuar / Créditos / Sair)
+├── menus_resultado.py →  Gerenciamento das telas de Game Over e Vitória de cada fase
+├── configuracao.py    →  Constantes globais (propriedades da tela, cores, layout, fases)
+├── personagem.py      →  Movimentação do jogador e efeitos sonoros
+├── blocos.py          →  Blocos de comando (direção e repetição)
+├── comandos.py        →  Botão genérico reutilizado pela interface gráfica
+├── matriz.py          →  Construção do labirinto a partir do JSON da fase
+├── barreira.py        →  Obstáculos e colisões do cenário
+├── item.py            →  Itens coletáveis que somam pontuação
+├── objetivo.py        →  Ponto de chegada e validação de fim da fase
+├── pontuacao.py       →  Contagem e persistência de pontos
+├── dados.py           →  Leitura/escrita do arquivo de save (recorde e fase atual)
+├── vidas.py           →  Desenho e controle das vidas (corações) durante a fase
+└── creditos.py        →  Tela de créditos (acessível pelo menu principal)
 
-fases/                →  definição de cada fase em JSON (mapa, blocos disponíveis)
-assets/fontes/        →  fonte pixelada usada na interface
-assets/sons/          →  trilha sonora e efeitos sonoros
-assets/sprites/       →  spritesheet e sprites do jogo
-tests/                →  script de verificação visual manual
-```
+fases/                 →  Definição de cada fase em formato JSON (mapas e blocos disponíveis)
+prototipos/            →  Esboços e códigos experimentais iniciais do projeto
+assets/fontes/         →  Fonte pixelada usada na interface do jogo
+assets/sons/           →  Trilha sonora de fundo e efeitos sonoros (passos, itens, colisões)
+assets/sprites/        →  Spritesheet e elementos visuais renderizados na tela
+tests/
+└── teste_visual.py    →  Script de verificação visual manual dos componentes gráficos
 
----
+Recursos Externos e Bibliografia
+Todos os recursos de terceiros utilizados no desenvolvimento de Perdido no Algoritmo respeitam suas respectivas licenças de uso gratuito e estão listados detalhadamente conforme nossa Bibliografia de Assets oficial:
 
-## Recursos Externos
+🎨 Elementos Visuais e Sprites
+Sprites do Labirinto e Personagens: Obtidos através de bancos de assets públicos gratuitos (ex: Itch.io / Kenney.nl).
 
-- Imagens obtidas de banco gratuito
-- Efeitos sonoros e trilha sonora obtidos de banco gratuito
-- Fonte personalizada (Press Start 2P)
+Interface e Botões: Customizados e renderizados via Pygame utilizando formas geométricas e sprites nativos do projeto.
 
----
+🎵 Áudio e Efeitos Sonoros
+Trilha Sonora de Fundo (BGM): Músicas no formato Chiptune/8-bit obtidas em plataformas de domínio público e bancos gratuitos.
 
-## Melhorias Previstas
+Efeitos Sonoros (SFX): Sons de passos, feedback de cliques, erro de comandos, coleta de moedas e transição de telas obtidos de forma livre.
 
-Caso haja tempo durante o desenvolvimento:
+✍️ Tipografia
+Fonte Principal: Fonte pixelada Press Start 2P, distribuída gratuitamente sob a licença open-source da Google Fonts.
 
-- [ ] Novas fases
-- [ ] Animações
-- [ ] Diferentes personagens
-- [ ] Novos tipos de obstáculos
-- [ ] Aumento de dificuldade
-
----
-
-<div align="center">
-
-```
 > Feito com ☕, 🧠 e muito  print("debug")
-```
-
-**Perdido no Algoritmo** — Projeto Acadêmico · 2026
-
-</div>
+Perdido no Algoritmo — Projeto Acadêmico · 2026

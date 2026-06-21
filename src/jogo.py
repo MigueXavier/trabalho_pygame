@@ -12,6 +12,7 @@ from src.menu import carregar_fonte, BotaoMenu
 from src.matriz import Matriz
 from src.pontuacao import Pontuacao
 from src.dados import Data
+from src.vidas  import Vidas
 
 class Jogo:
     def __init__(self):
@@ -45,6 +46,7 @@ class Jogo:
         self.objeto_matriz = Matriz(dados_fase)
         self.matriz = self.objeto_matriz.matriz
         self.acao_final = None
+        self.gerenciador_vidas = Vidas(vidas_iniciais=VIDAS_MAXIMAS)
         self.inicializar_elementos()
 
     def inicializar_elementos(self):
@@ -242,6 +244,12 @@ class Jogo:
 
         self.instrucoes = []
 
+        self._drag_item = None
+        self._drag_pos = (0, 0)
+        self._drag_indice_origem = None
+        self._drag_iniciou_em = (0, 0)
+        self._drag_ativo = False
+
         self.scroll_y = 0
         self.altura_conteudo = 0
         self.arrastando_scrollbar = False
@@ -267,6 +275,22 @@ class Jogo:
             if evento.type == pygame.MOUSEBUTTONUP and evento.button == 1:
                 self.arrastando_scrollbar = False
 
+                if self._drag_item is not None:
+                    pos_mouse = evento.pos
+                    if self._drag_ativo:
+                        indice_destino = self._calcular_indice_insercao(pos_mouse)
+                        if indice_destino is not None and indice_destino != self._drag_indice_origem:
+                            item = self.lista_pecas.pop(self._drag_indice_origem)
+                            if indice_destino > self._drag_indice_origem:
+                                indice_destino -= 1
+                            self.lista_pecas.insert(indice_destino, item)
+                    else:
+                        if self._remover_item_sequencia(pos_mouse):
+                            self.som_clique.play()
+                    self._drag_item = None
+                    self._drag_indice_origem = None
+                    self._drag_ativo = False
+
             if evento.type == pygame.MOUSEMOTION and self.arrastando_scrollbar and not self.estado_resultado:
                 geometria = self._geometria_scrollbar_sequencia()
                 if geometria is not None:
@@ -277,6 +301,14 @@ class Jogo:
                     progresso = (novo_y_cursor - trilho.y) / espaco_livre
                     self.scroll_y = progresso * maximo_scroll
                     self._limitar_scroll()
+                continue
+
+            if evento.type == pygame.MOUSEMOTION and self._drag_item is not None:
+                dx = abs(evento.pos[0] - self._drag_iniciou_em[0])
+                dy = abs(evento.pos[1] - self._drag_iniciou_em[1])
+                if dx > 5 or dy > 5:
+                    self._drag_ativo = True
+                self._drag_pos = evento.pos
                 continue
 
             if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
@@ -318,11 +350,20 @@ class Jogo:
                 else:
                     # ── Modo Normal ──
 
-                    # Clique dentro da caixa de sequência: tenta remover algo de lá primeiro
+                    # Clique dentro da caixa de sequência: tenta iniciar um arrasto primeiro
                     if self.area_sequencia.collidepoint(pos_mouse):
-                        if self._remover_item_sequencia(pos_mouse):
-                            self.som_clique.play()
-                            continue
+                        for item in getattr(self, "_hitboxes_sequencia", []):
+                            if item["rect"].collidepoint(pos_mouse) and item["tipo"] in ("bloco_solto", "loop_inteiro"):
+                                self._drag_item = self.lista_pecas[item["indice_peca"]]
+                                self._drag_indice_origem = item["indice_peca"]
+                                self._drag_pos = pos_mouse
+                                self._drag_iniciou_em = pos_mouse
+                                self._drag_ativo = False
+                                break
+                        else:
+                            if self._remover_item_sequencia(pos_mouse):
+                                self.som_clique.play()
+                        continue
 
                     clicou_bloco = False
                     for nome, bloco in self.blocos_paleta.items():
@@ -406,7 +447,7 @@ class Jogo:
         self.inicializar_elementos()
         self.personagem.linha = self.personagem.linha_inicial
         self.personagem.coluna = self.personagem.coluna_inicial
-        self.personagem.vidas = 3
+        self.personagem.vidas = VIDAS_MAXIMAS
         self.personagem.chegou_no_objetivo = False
         self.personagem.executando_comandos = False
         self.personagem.indice_comando_atual = 0
@@ -475,6 +516,9 @@ class Jogo:
         self.personagem._pontuacao = self.pontuacao
         self.scroll_y = 0
         self.arrastando_scrollbar = False
+        self._drag_item = None
+        self._drag_indice_origem = None
+        self._drag_ativo = False
 
     def _remover_item_sequencia(self, pos_mouse):
         # Percorre os itens clicáveis na ordem em que foram desenhados
@@ -509,6 +553,24 @@ class Jogo:
                 return True
 
         return False
+
+    def _calcular_indice_insercao(self, pos_mouse):
+        # Usa as hitboxes reais do último desenho (já levam em conta a altura
+        # variável dos blocos de loop) para decidir em que posição da lista
+        # o item arrastado deve ser solto.
+        itens_topo = sorted(
+            (
+                item for item in getattr(self, "_hitboxes_sequencia", [])
+                if item["tipo"] in ("bloco_solto", "loop_inteiro")
+            ),
+            key=lambda item: item["indice_peca"],
+        )
+
+        for item in itens_topo:
+            if pos_mouse[1] < item["rect"].centery:
+                return item["indice_peca"]
+
+        return len(self.lista_pecas)
 
     def _reabilitar_bloco_na_paleta(self, bloco_removido):
         # Ao remover um bloco da sequência, o bloco ORIGINAL correspondente na paleta
@@ -703,20 +765,23 @@ class Jogo:
 
             if getattr(peca, "tipo", None) == "repetir":
 
-                altura = self._desenhar_bloco_repetir_na_sequencia(
-                    peca, x, y, largura_bloco, indice_peca,
-                    em_construcao=False,
-                    hitboxes=self._hitboxes_sequencia
-                )
+                if indice_peca != self._drag_indice_origem or not self._drag_ativo:
+                    altura = self._desenhar_bloco_repetir_na_sequencia(
+                        peca, x, y, largura_bloco, indice_peca,
+                        em_construcao=False,
+                        hitboxes=self._hitboxes_sequencia
+                    )
+                else:
+                    altura = 70 + len(peca.comandos) * 45
 
-                
                 y += altura + espacamento_y
 
             else:
 
                 peca.rect.topleft = (x, y)
 
-                peca.desenhar(self.tela)
+                if indice_peca != self._drag_indice_origem or not self._drag_ativo:
+                    peca.desenhar(self.tela)
 
                 # Registra o bloco solto (fora de qualquer loop)
                 self._hitboxes_sequencia.append({
@@ -728,13 +793,20 @@ class Jogo:
     
                 y += altura_bloco_simples + espacamento_y
 
-        
         if self.modo_loop and self.loop_ativo is not None:
-            self._desenhar_bloco_repetir_na_sequencia(
+            altura_loop_fantasma = self._desenhar_bloco_repetir_na_sequencia(
                 self.loop_ativo, x, y, largura_bloco, indice_peca=None,
                 em_construcao=True,
                 hitboxes=None
             )
+            y += altura_loop_fantasma + espacamento_y 
+
+        self.tela.set_clip(clip_anterior)
+
+
+        self.altura_conteudo = (y + self.scroll_y) - inicio_y
+
+        
 
        
         self.tela.set_clip(clip_anterior)
@@ -871,11 +943,24 @@ class Jogo:
         self._desenhar_divisor_acoes(self.y_divisor_acoes)
         self._desenhar_texto_botao_acao(self.botao_sair.rect, "SAIR")
 
+        self.gerenciador_vidas.desenhar(self.tela, self.personagem.vidas)
+
         texto = self.fonte.render(f"Pontos: {self.pontuacao.pontos}", True, (255, 255, 255))
-        self.tela.blit(texto, (10, 10))
+        self.tela.blit(texto, (10, 52))
 
         if self.estado_resultado:
             self._desenhar_tela_resultado()
+
+        if self._drag_item is not None and self._drag_ativo:
+            superficie = pygame.Surface((self._drag_item.rect.width, self._drag_item.rect.height), pygame.SRCALPHA)
+            rect_original = self._drag_item.rect.copy()
+            self._drag_item.rect.topleft = (0, 0)
+            self._drag_item.desenhar(superficie)
+            self._drag_item.rect = rect_original
+            superficie.set_alpha(160)
+            x_arrasto = self._drag_pos[0] - self._drag_item.rect.width // 2
+            y_arrasto = self._drag_pos[1] - self._drag_item.rect.height // 2
+            self.tela.blit(superficie, (x_arrasto, y_arrasto))
 
         pygame.display.update()
 
@@ -1003,6 +1088,19 @@ class Jogo:
                 return
 
             texto = self._fonte_como_jogar.render(linha, True, (255, 255, 255))
+            self.tela.blit(texto, (x_texto, y))
+            y += 15
+
+        y += 4
+
+        explicacao_arrasta = "Arrastar: reorganiza | Clicar: apaga"
+        linhas_arrasta = self._quebrar_texto_em_linhas(explicacao_arrasta, self._fonte_como_jogar, largura_texto)
+
+        for linha in linhas_arrasta:
+            if y + 14 > self.area_como_jogar.bottom:
+                return
+
+            texto = self._fonte_como_jogar.render(linha, True, (200, 200, 200))
             self.tela.blit(texto, (x_texto, y))
             y += 15
 
