@@ -1,6 +1,6 @@
 import pygame
 import os
-from src.configuracao import LARGURA_TELA  
+from src.configuracao import LARGURA_TELA, resource_path
 
 class Vidas:
     def __init__(self, vidas_iniciais=3):
@@ -11,7 +11,7 @@ class Vidas:
         self.tamanho_sprite = (30, 30)
         
        
-        caminho_asset = "assets/sprites/sprits-jogo-python/vida.png"
+        caminho_asset = resource_path("assets/sprites/sprits-jogo-python/vida.png")
         
         try:
           

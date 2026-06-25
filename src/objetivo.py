@@ -7,7 +7,7 @@ class Objetivo:
     def __init__(self):
         self.x = None
         self.y = None
-        self.sprite = pygame.image.load("assets/sprites/sprits-jogo-python/estrela.png").convert_alpha()
+        self.sprite = pygame.image.load(resource_path("assets/sprites/sprits-jogo-python/estrela.png")).convert_alpha()
         self.sprite = pygame.transform.scale(self.sprite, (TAMANHO_CELULA -20 , TAMANHO_CELULA -20))
     
     def desenhar(self, superficie, x, y):

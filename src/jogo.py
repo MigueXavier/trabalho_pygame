@@ -21,17 +21,17 @@ class Jogo:
         if not pygame.mixer.get_init():
             pygame.mixer.init()
         if not pygame.mixer.music.get_busy():
-            pygame.mixer.music.load("assets/sons/musica_fundo.mp3")
+            pygame.mixer.music.load(resource_path("assets/sons/musica_fundo.mp3"))
             pygame.mixer.music.set_volume(0.2)
             pygame.mixer.music.play(-1)
 
-        self.som_clique = pygame.mixer.Sound("assets/sons/clique_botoes.mp3")
+        self.som_clique = pygame.mixer.Sound(resource_path("assets/sons/clique_botoes.mp3"))
         self.som_clique.set_volume(0.4)
 
-        self.som_passou_fase = pygame.mixer.Sound("assets/sons/next_level.mp3")
+        self.som_passou_fase = pygame.mixer.Sound(resource_path("assets/sons/next_level.mp3"))
         self.som_passou_fase.set_volume(0.30)
 
-        self.som_game_over = pygame.mixer.Sound("assets/sons/game_over.mp3")
+        self.som_game_over = pygame.mixer.Sound(resource_path("assets/sons/game_over.mp3"))
         self.som_game_over.set_volume(0.30)
 
         self.tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
@@ -40,7 +40,7 @@ class Jogo:
         self.rodando = True
         self.save_dados = Data.carregar_dados()
         self.faseAtual = self.save_dados.get("fase_atual", 1)
-        with open(f"fases/fase_{self.faseAtual}.json", "r", encoding="utf-8") as arquivo:
+        with open(resource_path(f"fases/fase_{self.faseAtual}.json"), "r", encoding="utf-8") as arquivo:
             dados_fase = json.load(arquivo)
         self.dados = dados_fase
         self.objeto_matriz = Matriz(dados_fase)
@@ -178,7 +178,7 @@ class Jogo:
 
         self._fonte_ui = pygame.font.SysFont(None, 20)
         self._fonte_titulo_painel = pygame.font.SysFont(None, 24, bold=True)
-        self._fonte_setas_texto = pygame.font.Font("assets/fontes/PressStart2P.ttf", 10)
+        self._fonte_setas_texto = pygame.font.Font(resource_path("assets/fontes/PressStart2P.ttf"), 10)
         self._fonte_como_jogar = pygame.font.SysFont(None, 17)
 
         self.lista_pecas    = []
@@ -210,17 +210,17 @@ class Jogo:
         self.botao_sair = BotaoMenu(btn_x, y_sair, btn_w, btn_h, "")
     
 
-        self._fonte_botoes_acoes = pygame.font.Font("assets/fontes/PressStart2P.ttf", 12)
+        self._fonte_botoes_acoes = pygame.font.Font(resource_path("assets/fontes/PressStart2P.ttf"), 12)
     
-        self._fonte_botoes_acoes = pygame.font.Font("assets/fontes/PressStart2P.ttf", 12)
+        self._fonte_botoes_acoes = pygame.font.Font(resource_path("assets/fontes/PressStart2P.ttf"), 12)
 
         tamanho_icone = 16
         self._icone_play = pygame.transform.scale(
-            pygame.image.load("assets/sprites/icones/play.png").convert_alpha(),
+            pygame.image.load(resource_path("assets/sprites/icones/play.png")).convert_alpha(),
             (tamanho_icone, tamanho_icone)
         )
         self._icone_reset = pygame.transform.scale(
-            pygame.image.load("assets/sprites/icones/reset.png").convert_alpha(),
+            pygame.image.load(resource_path("assets/sprites/icones/reset.png")).convert_alpha(),
             (tamanho_icone, tamanho_icone)
         )
 
@@ -437,7 +437,7 @@ class Jogo:
         self.personagem._pontuacao = self.pontuacao
 
     def _carregar_fase(self, numero_fase):
-        with open(f"fases/fase_{numero_fase}.json", "r", encoding="utf-8") as arquivo:
+        with open(resource_path(f"fases/fase_{numero_fase}.json"), "r", encoding="utf-8") as arquivo:
             self.dados = json.load(arquivo)
         self.objeto_matriz = Matriz(self.dados)
         self.matriz = self.objeto_matriz.matriz

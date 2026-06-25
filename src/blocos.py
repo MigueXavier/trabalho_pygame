@@ -11,7 +11,7 @@ class Bloco:
         self.cor = cor
      
         pygame.font.init()
-        self.fonte = pygame.font.Font("assets/fontes/PressStart2P.ttf", 14)
+        self.fonte = pygame.font.Font(resource_path("assets/fontes/PressStart2P.ttf"), 14)
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -19,7 +19,7 @@ class Bloco:
         memo[id(self)] = novo
         for k, v in self.__dict__.items():
             if isinstance(v, pygame.font.Font):
-                setattr(novo, k, pygame.font.Font("assets/fontes/PressStart2P.ttf", 14))
+                setattr(novo, k, pygame.font.Font(resource_path("assets/fontes/PressStart2P.ttf"), 14))
             else:
                 setattr(novo, k, copy.deepcopy(v, memo))
         return novo

@@ -1,6 +1,6 @@
 import pygame
 import webbrowser
-from src.configuracao import LARGURA_TELA, ALTURA_TELA, FPS, CORES
+from src.configuracao import LARGURA_TELA, ALTURA_TELA, FPS, CORES, resource_path
 from src.menu import carregar_fonte, BotaoMenu
 
 LINK_DRIVE = "https://docs.google.com/document/d/1oPYUyG7PTLMurCZRVeUnn1HWvLiTJ0tqD6Mjl2VeP3c/edit?usp=drivesdk"
@@ -25,7 +25,7 @@ class Creditos:
     def _carregar_assets(self):
         def carregar(caminho, escala=None):
             try:
-                img = pygame.image.load(caminho).convert_alpha()
+                img = pygame.image.load(resource_path(caminho)).convert_alpha()
                 if escala:
                     img = pygame.transform.scale(img, escala)
                 return img

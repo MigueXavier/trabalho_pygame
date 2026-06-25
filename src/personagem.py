@@ -1,6 +1,6 @@
 import pygame
 import random
-from src.configuracao import TAMANHO_CELULA, CORES, VIDAS_MAXIMAS
+from src.configuracao import *
 from src.item import Item
 from src.objetivo import Objetivo
 
@@ -10,25 +10,25 @@ class Personagem:
         self.coluna = coluna_inicio
         self.linha = linha_inicio
 
-        self.sprite = pygame.image.load("assets/sprites/sprits-jogo-python/personagem1.png").convert_alpha()
+        self.sprite = pygame.image.load(resource_path("assets/sprites/sprits-jogo-python/personagem1.png")).convert_alpha()
         self.sprite = pygame.transform.scale(self.sprite, (TAMANHO_CELULA, TAMANHO_CELULA))
 
         self.sons_passo = [
-            pygame.mixer.Sound("assets/sons/step_1.mp3"),
-            pygame.mixer.Sound("assets/sons/step_2.mp3"),
-            pygame.mixer.Sound("assets/sons/step_3.mp3")
+            pygame.mixer.Sound(resource_path("assets/sons/step_1.mp3")),
+            pygame.mixer.Sound(resource_path("assets/sons/step_2.mp3")),
+            pygame.mixer.Sound(resource_path("assets/sons/step_3.mp3"))
         ]
 
         for som in self.sons_passo:
             som.set_volume(0.05)
 
-        self.som_coleta = pygame.mixer.Sound("assets/sons/coleta_itens.mp3")
+        self.som_coleta = pygame.mixer.Sound(resource_path("assets/sons/coleta_itens.mp3"))
         self.som_coleta.set_volume(0.15)
 
-        self.som_bater = pygame.mixer.Sound("assets/sons/bater_caixa.mp3")
+        self.som_bater = pygame.mixer.Sound(resource_path("assets/sons/bater_caixa.mp3"))
         self.som_bater.set_volume(0.10)
 
-        self.som_perder_vida = pygame.mixer.Sound("assets/sons/perder_vida.mp3")
+        self.som_perder_vida = pygame.mixer.Sound(resource_path("assets/sons/perder_vida.mp3"))
         self.som_perder_vida.set_volume(0.15)
 
 

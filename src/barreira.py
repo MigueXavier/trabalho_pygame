@@ -11,7 +11,7 @@ class Barreira:
         self.width = largura_altura
         self.height = largura_altura
         self.color = color
-        self.sprite = pygame.image.load("assets/sprites/sprits-jogo-python/obstaculo.png").convert_alpha()
+        self.sprite = pygame.image.load(resource_path("assets/sprites/sprits-jogo-python/obstaculo.png")).convert_alpha()
         self.sprite = pygame.transform.scale(self.sprite, (TAMANHO_CELULA, TAMANHO_CELULA))
 
     def desenhar(self, superficie, x, y):

@@ -9,7 +9,7 @@ from src.objetivo import Objetivo
 
 class Matriz:
     def __init__(self, dados_fase=None):
-        self.spritesheet = pygame.image.load("assets/sprites/sprits-jogo-python/dungeon_sheet.png").convert_alpha()
+        self.spritesheet = pygame.image.load(resource_path("assets/sprites/sprits-jogo-python/dungeon_sheet.png")).convert_alpha()
         self.TAM_SPRITE_BASE = 16 
 
         coordenadas_paredes = {
@@ -28,7 +28,7 @@ class Matriz:
             sub_surface = self.spritesheet.subsurface(pygame.Rect(coord))
             self.sprites_parede[nome] = pygame.transform.scale(sub_surface, (TAMANHO_CELULA, TAMANHO_CELULA))
 
-        self.fundo = pygame.image.load("assets/sprites/sprits-jogo-python/fundo_16px.png").convert()
+        self.fundo = pygame.image.load(resource_path("assets/sprites/sprits-jogo-python/fundo_16px.png")).convert()
         self.fundo = pygame.transform.scale(self.fundo, (TAMANHO_CELULA, TAMANHO_CELULA))
 
         self.matriz = []

@@ -1,9 +1,9 @@
 import pygame
-from src.configuracao import LARGURA_TELA, ALTURA_TELA, FPS, CORES
+from src.configuracao import LARGURA_TELA, ALTURA_TELA, FPS, CORES, resource_path
 from src.dados import Data
 
 ESCALA = 3  
-FONTE_PIXEL = "assets/fontes/PressStart2P.ttf"
+FONTE_PIXEL = resource_path("assets/fontes/PressStart2P.ttf")
 
 
 def carregar_fonte(tamanho):
@@ -15,7 +15,7 @@ def carregar_fonte(tamanho):
 
 class BotaoMenu:
     def __init__(self, x, y, largura, altura, texto, desabilitado=False, tile=None, tamanho_fonte=14):
-        self.som_clique = pygame.mixer.Sound("assets/sons/clique_botoes.mp3")
+        self.som_clique = pygame.mixer.Sound(resource_path("assets/sons/clique_botoes.mp3"))
         self.som_clique.set_volume(0.08)
         self.rect = pygame.Rect(x, y, largura, altura)
         self.texto = texto
@@ -91,7 +91,7 @@ class Menu:
     def _carregar_assets(self):
         def carregar(caminho, escala=None):
             try:
-                img = pygame.image.load(caminho).convert_alpha()
+                img = pygame.image.load(resource_path(caminho)).convert_alpha()
                 if escala:
                     img = pygame.transform.scale(img, escala)
                 return img

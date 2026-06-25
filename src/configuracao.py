@@ -1,3 +1,15 @@
+import sys
+import os
+
+def resource_path(caminho_relativo):
+    """Resolve o caminho de um asset, funcionando tanto em desenvolvimento
+    quanto dentro de um executável gerado pelo PyInstaller."""
+    if hasattr(sys, '_MEIPASS'):
+        base = sys._MEIPASS
+    else:
+        base = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    return os.path.join(base, caminho_relativo)
+
 LARGURA_TELA = 1200
 ALTURA_TELA  = 600
 FPS          = 60
